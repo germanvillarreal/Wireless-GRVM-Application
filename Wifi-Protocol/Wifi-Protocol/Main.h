@@ -19,7 +19,7 @@ BOOL FileRead(HWND, LPCSTR);
 void OkMessage(HWND, TCHAR*, TCHAR*);
 
 // Vars
-const LPTSTR lpszCommName	= TEXT("COM0");
+const LPTSTR lpszCommName	= TEXT("COM1");
 
 
 
