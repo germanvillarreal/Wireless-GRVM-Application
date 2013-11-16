@@ -498,7 +498,7 @@ BOOL FileRead(HWND hwndEdit, LPCSTR pstrFileName){
                //free(pszFileText); //not sure if this is needed here or not as i think this frees the memory (i.e. the stuff we read)
             }
         }
-       // CloseHandle(hFile);
+       CloseHandle(hFile);
     }
     return bSuccess;
 }
