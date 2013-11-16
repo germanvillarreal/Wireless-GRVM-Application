@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include "Includes.h"
+#include "Session.h"
 
 #define UNTITLED TEXT ("(untitled)")
 

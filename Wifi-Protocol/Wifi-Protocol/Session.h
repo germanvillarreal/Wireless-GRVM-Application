@@ -5,7 +5,7 @@
 
 // Function Prototypes
 bool SetupPort (LPTSTR);
-bool ConfigurePort (HWND*, TCHAR*);
+bool ConfPort (HWND*, LPTSTR);
 
 // Vars
 extern HANDLE hComm;

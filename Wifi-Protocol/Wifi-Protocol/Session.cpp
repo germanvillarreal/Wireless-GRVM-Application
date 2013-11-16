@@ -65,7 +65,7 @@ bool SetupPort (LPTSTR lpszPortName)
 
 
 /*-----------------------------------------------------------------------------
--	FUNCTION:	ConfigurePort
+-	FUNCTION:	ConfPort
 -
 -	DATE:		September 20th, 2013
 -
@@ -75,10 +75,10 @@ bool SetupPort (LPTSTR lpszPortName)
 -
 -	PROGRAMMER:	Vincent Lau
 -
--	INTERFACE:	bool ConfigurePort (HWND* lphwnd, TCHAR* lpszOpenedPort)
+-	INTERFACE:	bool ConfigurePort (HWND* lphwnd, LPTSTR* lpszOpenedPort)
 -
 -	PARAMETERS:	HWND* lphwnd - Pointer to the main window's handle
--				TCHAR* lpszOpenedPort - Name of the serial port that is connected
+-				LPTSTR lpszOpenedPort - Name of the serial port that is connected
 -
 -	RETURNS:	TRUE	- if the configuration was successful
 -				FALSE	- if a configuration error occured or the dialog was canceled
@@ -88,7 +88,7 @@ bool SetupPort (LPTSTR lpszPortName)
 -			device and get+set the default timeouts for the specified port.
 -
 -----------------------------------------------------------------------------*/
-bool ConfigurePort (HWND* lphwnd, TCHAR* lpszOpenedPort)
+bool ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 {
 	COMMCONFIG	cc;
 	COMMTIMEOUTS comTimeout;

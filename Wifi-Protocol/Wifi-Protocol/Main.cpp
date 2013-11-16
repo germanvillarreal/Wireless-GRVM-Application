@@ -267,9 +267,16 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 		case IDM_DISCONNECT:
 			break;
 		case IDM_CONFIG:
-			GetCommConfig(hComm, &cc, &cc.dwSize);
+			
+			if(SetupPort(lpszCommName))
+			{
+				if (ConfPort(&MainWindow, lpszCommName))
+					break;
+			}
+			//test(&hwnd, lpszCommName);
+			/*GetCommConfig(hComm, &cc, &cc.dwSize);
 			if (!CommConfigDialog (lpszCommName, hwnd, &cc)) 
-				break; 
+				break;*/ 
 			break;
 		case IDM_ABOUT:
 			DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc) ;
