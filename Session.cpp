@@ -1,0 +1,24 @@
+
+/*-----------------------------------------------------------------------------
+--  SOURCE FILE:    Session.cpp
+--
+--  PROGRAM:        Wireless Protocol (GRVM)
+--
+--  FUNCTIONS:      
+--                              
+--  
+--
+--  DATE:           
+--
+--  REVISIONS:      ...
+--
+--  DESIGNER:       
+--
+--  PROGRAMMER:     
+--
+--  NOTES:
+--		This layer will manage the connection between the wireless device and
+--		the computer via Serial Port.
+--		
+--		
+-----------------------------------------------------------------------------*/

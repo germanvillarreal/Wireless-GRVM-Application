@@ -16,6 +16,10 @@ BOOL FileOpenDlg (HWND, PTSTR, LPCSTR);
 BOOL FileRead(HWND, LPCSTR);
 void OkMessage(HWND, TCHAR*, TCHAR*);
 
-const LPTSTR lpszCommName	= TEXT("COM1");
+// Vars
+const LPTSTR lpszCommName	= TEXT("COM0");
+
+
+
 
 #endif
