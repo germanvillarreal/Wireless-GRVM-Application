@@ -22,3 +22,5 @@
 --		device conneceted to the other computer). Error checking will be done
 --		via open-source CRC.
 -----------------------------------------------------------------------------*/
+#include <crc.hpp>
+#include <config.hpp>
