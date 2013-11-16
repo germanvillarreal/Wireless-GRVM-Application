@@ -35,11 +35,6 @@
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 
-#include <windows.h>
-#include <windowsx.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <commdlg.h>
 #include "Main.h"
 #include "Resource.h"
 
