@@ -59,7 +59,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\Maciu\Documents\GitHub\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol\boost;$(IncludePath)</IncludePath>
+    <IncludePath>E:\Dropbox\2013 BCIT Fall\COMP 3980 Internetworking 1\FINAL PROJECT\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol\boost;C:\Users\Maciu\Documents\GitHub\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol\boost;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

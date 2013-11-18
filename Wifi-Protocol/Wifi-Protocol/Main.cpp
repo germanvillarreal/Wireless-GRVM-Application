@@ -163,6 +163,9 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 		return hwnd;
 	nCmdShow = SW_SHOW;
 
+	// Disalbes the Disconnect button at start of window
+	EnableMenuItem(GetMenu(hwnd), IDM_DISCONNECT, MF_DISABLED);
+
 	ShowWindow (hwnd, nCmdShow);
 	UpdateWindow (hwnd);
 
@@ -231,6 +234,7 @@ BOOL Window_OnCreate(HWND hwnd){
 -- REVISIONS: 
 -- November 13, 2013 - Mat Siwoski: Completed implementation of the SendFile
 -- November 13, 2013 - Mat Siwoski: Implementation of the Config option.
+-- November 18, 2013 - Robin Hsieh: Added the enabling and disabling menu items.
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -252,6 +256,9 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 	static HWND hwndEdit ;
 	switch(id){
 		case IDM_CONNECT:
+				EnableMenuItem(GetMenu(hwnd), IDM_CONNECT, MF_DISABLED);
+				EnableMenuItem(GetMenu(hwnd), IDM_DISCONNECT, MF_ENABLED);
+				DrawMenuBar(hwnd);
 			break;
 		case IDM_SENDFILE:
 			if (FileOpenDlg(hwnd, szFileName, szTitleName)){
@@ -266,6 +273,9 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 			}
 			break;
 		case IDM_DISCONNECT:
+			EnableMenuItem(GetMenu(hwnd), IDM_CONNECT, MF_ENABLED);
+			EnableMenuItem(GetMenu(hwnd), IDM_DISCONNECT, MF_DISABLED);
+			DrawMenuBar(hwnd);
 			break;
 		case IDM_CONFIG:
 			
