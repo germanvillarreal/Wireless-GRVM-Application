@@ -7,7 +7,7 @@
 --                  bool PacketCheck(char[1024] packet)
 --  
 --
---  DATE:			  
+--  DATE:			Nov. 16th, 2013
 --
 --  REVISIONS:      ...
 --
