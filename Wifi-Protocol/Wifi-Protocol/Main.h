@@ -18,8 +18,9 @@ void OpenFileInitialize(HWND);
 BOOL FileOpenDlg (HWND, PTSTR, LPCSTR);
 BOOL FileRead(HWND, LPCSTR);
 void OkMessage(HWND, TCHAR*, TCHAR*);
+BOOL ErrorCheck(char pkt[1024] );
 
-// Vars
+// Variables
 const LPTSTR lpszCommName	= TEXT("COM1");
 
 

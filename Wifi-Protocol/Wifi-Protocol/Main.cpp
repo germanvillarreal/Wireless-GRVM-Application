@@ -47,28 +47,29 @@ HANDLE hf;						// file handle
 HANDLE hComm;
 COMMCONFIG cc;
 LPSTR pszFileText;
-/*------------------------------------------------------------------------------------------------------------------
--- FUNCTION: WinMain
---
--- DATE: November 12, 2013
---
--- REVISIONS: 
---
--- DESIGNER: Mat Siwoski
---
--- PROGRAMMER: Mat Siwoski
---
--- INTERFACE: int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
---				HINSTANCE hInst: Handle to the current instance of the program.
---				HINSTANCE hPrevInstance: Handle to the previous instance of the program.
---				LPSTR lspszCmdParam: Command line for the application.
---				int nCmdShow: Control for how the window should be shown.
---
--- RETURNS: Returns the exit value upon exit.
---
--- NOTES:
--- This function is the entry point for a graphical Windows-based application.
-------------------------------------------------------------------------------------------------------------------*/
+
+	/*------------------------------------------------------------------------------------------------------------------
+	-- FUNCTION: WinMain
+	--
+	-- DATE: November 12, 2013
+	--
+	-- REVISIONS: 
+	--
+	-- DESIGNER: Mat Siwoski
+	--
+	-- PROGRAMMER: Mat Siwoski
+	--
+	-- INTERFACE: int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
+	--				HINSTANCE hInst: Handle to the current instance of the program.
+	--				HINSTANCE hPrevInstance: Handle to the previous instance of the program.
+	--				LPSTR lspszCmdParam: Command line for the application.
+	--				int nCmdShow: Control for how the window should be shown.
+	--
+	-- RETURNS: Returns the exit value upon exit.
+	--
+	-- NOTES:
+	-- This function is the entry point for a graphical Windows-based application.
+	------------------------------------------------------------------------------------------------------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
 {
 	MSG Msg;

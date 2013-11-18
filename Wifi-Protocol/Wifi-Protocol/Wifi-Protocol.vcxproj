@@ -18,6 +18,7 @@
     <ClInclude Include="Vars.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ErrorCheck.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Physical.cpp" />
     <ClCompile Include="Session.cpp" />
