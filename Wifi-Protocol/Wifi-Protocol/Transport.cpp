@@ -1,14 +1,13 @@
-
 /*-----------------------------------------------------------------------------
 --  SOURCE FILE:    Transport.cpp
 --
 --  PROGRAM:        Wireless Protocol (GRVM)
 --
---  FUNCTIONS:      
---                              
+--  FUNCTIONS:      void Transmit(char* lpszFileBuffer)
+--                  bool PacketCheck(char[1024] packet)
 --  
 --
---  DATE:           
+--  DATE:			  
 --
 --  REVISIONS:      ...
 --

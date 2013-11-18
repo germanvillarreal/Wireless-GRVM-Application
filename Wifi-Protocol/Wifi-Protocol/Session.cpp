@@ -3,11 +3,11 @@
 --
 --  PROGRAM:        Wireless Protocol (GRVM)
 --
---  FUNCTIONS:      
---                              
+--  FUNCTIONS:      bool SetupPort(LPTSTR)
+--                  bool ConfPort(HWND*, LPTSTR)
 --  
 --
---  DATE:           
+--  DATE:           Nov. 16th, 2013
 --
 --  REVISIONS:      ...
 --

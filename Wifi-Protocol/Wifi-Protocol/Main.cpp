@@ -273,7 +273,7 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 				if (ConfPort(&MainWindow, lpszCommName))
 					break;
 			}
-			//test(&hwnd, lpszCommName);
+
 			/*GetCommConfig(hComm, &cc, &cc.dwSize);
 			if (!CommConfigDialog (lpszCommName, hwnd, &cc)) 
 				break;*/ 
