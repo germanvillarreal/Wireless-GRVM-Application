@@ -11,7 +11,7 @@
 --
 --  REVISIONS:      ...
 --
---  DESIGNER:       
+--  DESIGNER:       Vincent Lau
 --
 --  PROGRAMMER:     
 --
@@ -21,4 +21,7 @@
 --		device conneceted to the other computer). Error checking will be done
 --		via open-source CRC.
 -----------------------------------------------------------------------------*/
-#include <crc.hpp>
+
+#include "Transport.h"
+
+

@@ -3,6 +3,7 @@
 
 #include "Includes.h"
 #include "Session.h"
+#include "Transport.h"
 
 #define UNTITLED TEXT ("(untitled)")
 
