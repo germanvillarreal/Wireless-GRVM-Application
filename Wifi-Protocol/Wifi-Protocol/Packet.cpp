@@ -4,31 +4,39 @@
 --
 --  PROGRAM:        Wireless Protocol (GRVM)
 --
---  FUNCTIONS:      
+--  FUNCTIONS:      CHAR* packetize(FILE*, int)
+--                  BOOL PacketCheck(HWND, char[1024], int*)
 --                              
 --  
 --
---  DATE:           
+--  DATE:           2013/11/18
 --
---  REVISIONS:      ...
+--  REVISIONS:      2013/11/20 - German Villarreal
+--                  Added PacketCheck function
 --
 --  DESIGNER:       
 --
---  PROGRAMMER:     
+--  PROGRAMMER:     German Villarreal   
 --
---  NOTES:
+--  NOTES:          
+--      Current problems:
+--          -if NACK was received, packetCheck must have a way to resend the last packet
+--          -Receive/PacketCheck may need a better way to know what type of packet to expect next
+--          -Receive thread needs hwnd to pass to packetCheck to pass to Display if the packet was received successfully
+--          -unsure of trailer bytes to add in packetize
 --
 -----------------------------------------------------------------------------*/
 
 #include "Packet.h"
 
-CHAR* packetize(FILE* bufferWithFile, int SentPacketCounter)
+CHAR* packetize(FILE* bufferWithFile, int sentPacketCounter)
 {
 	char data[PACKET_BYTES_DATA];
 	char packet[PACKET_BYTES_TOTAL];
 	size_t ndx;
+
 	//1020 x sentPacketCounter = startingLocation
-	int StartLoc = PACKET_BYTES_DATA * SentPacketCounter;
+	int StartLoc = PACKET_BYTES_DATA * sentPacketCounter;
 
 	// Go to the begining of the line
 	if(fseek(bufferWithFile, StartLoc, SEEK_SET) != 0)
@@ -52,57 +60,57 @@ CHAR* packetize(FILE* bufferWithFile, int SentPacketCounter)
 	}
 
 	// Pad remains Bytes with null
-	while( ndx < PACKET_BYTES_DATA)
+	while(ndx < PACKET_BYTES_DATA)
 	{
 		data[ndx] = '\0';
 	}
 
-	packet[1] = (SentPacketCounter % 2 == 0) ? DC1 : DC2;
+	// Add control bytes to the packet
+	packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
+
+	// Add data bytes to the packet
 	packet[2] = data[PACKET_BYTES_DATA];
-	packet[PACKET_BYTES_DATA];
+	
+	// Add the trailer bytes to the packet (CRC)
+	//packet[PACKET_BYTES_DATA] = ;
 
-//If (sentPacketBuffer % 2 == 0)
-//	Packet[1] = DC1
-//Else
-//	Packet[1] = DC2
-
-   //create return string returnstr
-   //add control bytes to returnstr
-   //if s[i] != eof
-   //   returnstr += s[i]
-   //
-   // while i != 1022
-   //    returnstr += '\0'		
-   // returnstr += trailer bytes
-   // return returnstr
+	return packet;
 }
 
-BOOL PacketCheck(HWND hwnd, char packet[1024])
+
+BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 {
     //switch (char[1])
 	switch(packet[1])
 	{
 	case ENQ:
 		//send(ACK);
+
 		//Set "what we're waiting for" flag to PACKET_DC1
-	break;
+		*waitForType = DC1;
+	return TRUE;
 	case DC1:
-		//if we're waiting for a DC2 packet:
+		//if we're waiting for a DC2 packet
+		if(*waitForType == DC2)
+		{
 			//send (NAK);
-			//break;
-			
+			break;
+		}
+
 		if (!ErrorCheck(packet[1022], packet[1023]))
 		{
-			send(NAK);
+			//send(NAK);
 			break;
 		}
 	
 		send (ACK);
-		Display();//read the remaining 1020 characters 
-	break;
+		Display(hwnd);//read the remaining 1020 characters 
+	return TRUE;
+	
 			
 	case DC2:
-		if ("what we're waiting for" is a PACKET_DC1)
+		// if we're waiting for a DC1 packet
+		if (*waitForType == DC1)
 		{
 			send (NAK);
 			break;
@@ -114,16 +122,18 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 		}
 		send (ACK);
 		Display();//read the remaining 1020 characters 
-		break;
+	return TRUE;
 		
-		case NAK:
-			//Set "What we're waiting for" flag to ACK
-			send (previous packet); //need a way to keep that
-			break;
+	case NAK:
+
+		//Set "What we're waiting for" flag to ACK
+		*waitForType = ACK;
+		send (previous packet); //need a way to keep that
+	break;
 		
-		case EOT:
-			// GO back to IDLE state
-			Set "what we're waiting for" flag to ENQ
-			break;
+	case EOT:
+		// GO back to IDLE state
+		*waitForType = ENQ;
+	break;
     }
 }
