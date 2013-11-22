@@ -14,7 +14,10 @@
 
 
 // Function Prototypes
-CHAR* packetize(FILE*, int);
-BOOL PacketCheck(HWND, char[1024], int*)
+CHAR* Packetize(FILE*, int);
+BOOL PacketCheck(HWND, char[1024], int*);
+
+// vars
+extern HANDLE hACKWaitSemaphore;
 
 #endif

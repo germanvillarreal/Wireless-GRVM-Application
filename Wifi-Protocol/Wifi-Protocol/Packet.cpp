@@ -4,7 +4,7 @@
 --
 --  PROGRAM:        Wireless Protocol (GRVM)
 --
---  FUNCTIONS:      CHAR* packetize(FILE*, int)
+--  FUNCTIONS:      CHAR* Packetize(FILE*, int)
 --                  BOOL PacketCheck(HWND, char[1024], int*)
 --                              
 --  
@@ -29,7 +29,7 @@
 
 #include "Packet.h"
 
-CHAR* packetize(FILE* bufferWithFile, int sentPacketCounter)
+CHAR* Packetize(FILE* bufferWithFile, int sentPacketCounter)
 {
 	char data[PACKET_BYTES_DATA];
 	char packet[PACKET_BYTES_TOTAL];
@@ -88,6 +88,9 @@ BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 
 		//Set "what we're waiting for" flag to PACKET_DC1
 		*waitForType = DC1;
+	return TRUE;
+	case ACK:
+		ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
 	return TRUE;
 	case DC1:
 		//if we're waiting for a DC2 packet

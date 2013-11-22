@@ -42,6 +42,7 @@ static HWND MainWindow;
 static char szAppName[] = "Windows Protocol";
 static HINSTANCE hInstance;
 static OPENFILENAME ofn;
+static HANDLE hACKWaitSemaphore = INVALID_HANDLE_VALUE;
 char szFile[260];				// buffer for file name
 HANDLE hf;						// file handle
 HANDLE hComm;
@@ -85,7 +86,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	}
 	cc.dwSize = sizeof(COMMCONFIG);
 	cc.wVersion = 0x100;
+	
+	// Non-Window related inits
 	hComm = 0;
+	hACKWaitSemaphore = CreateSemaphore(NULL, 1, 1, NULL);
+
+	if(hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE)
+	{
+
+	}
+
 	while (GetMessage (&Msg, NULL, 0, 0))
 	{
 		TranslateMessage (&Msg);
@@ -302,7 +312,7 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 --
 -- DATE: November 12, 2013
 --
--- REVISIONS: 
+-- REVISIONS: 2013/11/21 - Vincent - Added cleanup
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -314,9 +324,11 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 -- RETURNS: -
 --
 -- NOTES:
--- This function shuts down the program
+-- This function cleans up handles and shuts down the program.
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnDestroy (HWND hwnd){
+	CloseHandle(hACKWaitSemaphore);
+	CloseHandle(hComm);
 	PostQuitMessage(0);
 }
 

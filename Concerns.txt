@@ -1,0 +1,8 @@
+- Packetize needs to take in a char* instead of a FILE*
+
+- Packetize also should be able to edit a bool value based on whether or not the file has ended.
+    - A way to do that is when it needs to pad NULLs in the packet, it should mark the file as ended.
+    - Use this bool in Transmit() to determine when to exit the file packetize loop
+    
+- Transmit has no way of pausing at the moment
+    - Transmit has a comment to keep this idea around with a semaphore
