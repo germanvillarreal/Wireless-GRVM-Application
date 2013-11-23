@@ -16,12 +16,13 @@
 -- BOOL FileOpenDlg(HWND, PTSTR, PTSTR)
 -- BOOL FileRead(HWND, PTSTR)
 -- void OkMessage(HWND, TCHAR*, TCHAR*)
---
+-- void DisplayText(HWND, LPCSTR)
 --
 -- DATE: November 12, 2013
 --
 -- REVISIONS:  
 -- November 12, 2013 - Mat Siwoski: Added Window_OnCreate, OpenFileInitialize, FileOpenDlg & FileRead
+-- November 23, 2013 - Mat Siwoski: Added DisplayText
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -42,37 +43,36 @@ static HWND MainWindow;
 static char szAppName[] = "Windows Protocol";
 static HINSTANCE hInstance;
 static OPENFILENAME ofn;
-static bool bWantToRead = FALSE;
-static HANDLE hACKWaitSemaphore = INVALID_HANDLE_VALUE;
-static HANDLE hReceiveThread	= INVALID_HANDLE_VALUE;
+BOOL bWantToRead = FALSE;
+HANDLE hACKWaitSemaphore = INVALID_HANDLE_VALUE;
+HANDLE hReceiveThread	= INVALID_HANDLE_VALUE;
 char szFile[260];				// buffer for file name
 HANDLE hf;						// file handle
 HANDLE hComm;
 COMMCONFIG cc;
-LPSTR pszFileText;
-
-	/*------------------------------------------------------------------------------------------------------------------
-	-- FUNCTION: WinMain
-	--
-	-- DATE: November 12, 2013
-	--
-	-- REVISIONS: 
-	--
-	-- DESIGNER: Mat Siwoski
-	--
-	-- PROGRAMMER: Mat Siwoski
-	--
-	-- INTERFACE: int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
-	--				HINSTANCE hInst: Handle to the current instance of the program.
-	--				HINSTANCE hPrevInstance: Handle to the previous instance of the program.
-	--				LPSTR lspszCmdParam: Command line for the application.
-	--				int nCmdShow: Control for how the window should be shown.
-	--
-	-- RETURNS: Returns the exit value upon exit.
-	--
-	-- NOTES:
-	-- This function is the entry point for a graphical Windows-based application.
-	------------------------------------------------------------------------------------------------------------------*/
+LPSTR pszFileText, pText;
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: WinMain
+--
+-- DATE: November 12, 2013
+--
+-- REVISIONS: 
+--
+-- DESIGNER: Mat Siwoski
+--
+-- PROGRAMMER: Mat Siwoski
+--
+-- INTERFACE: int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
+--				HINSTANCE hInst: Handle to the current instance of the program.
+--				HINSTANCE hPrevInstance: Handle to the previous instance of the program.
+--				LPSTR lspszCmdParam: Command line for the application.
+--				int nCmdShow: Control for how the window should be shown.
+--
+-- RETURNS: Returns the exit value upon exit.
+--
+-- NOTES:
+-- This function is the entry point for a graphical Windows-based application.
+------------------------------------------------------------------------------------------------------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
 {
 	MSG Msg;
@@ -87,6 +87,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	if (!MainWindow){
 		return FALSE;
 	}
+	ShowWindow (MainWindow, nCmdShow);
+	UpdateWindow (MainWindow);
 	cc.dwSize = sizeof(COMMCONFIG);
 	cc.wVersion = 0x100;
 	
@@ -153,6 +155,7 @@ BOOL Register(HINSTANCE hInst)
 -- DATE: November 12, 2013
 --
 -- REVISIONS: 
+-- November 23, 2013 - Added scroll bars to window
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -169,9 +172,9 @@ BOOL Register(HINSTANCE hInst)
 ------------------------------------------------------------------------------------------------------------------*/
 HWND Create(HINSTANCE hInst, int nCmdShow)
 {
-	hInstance = hInst;
+	//hInstance = hInst;
 
-	HWND hwnd = CreateWindow (szAppName, szAppName, WS_OVERLAPPEDWINDOW,
+	HWND hwnd = CreateWindow (szAppName, szAppName, WS_OVERLAPPEDWINDOW | WS_HSCROLL | WS_VSCROLL,
 		CW_USEDEFAULT, CW_USEDEFAULT, 600, 400, NULL, NULL, hInst, NULL);
 
 	if (hwnd == NULL)
@@ -180,9 +183,6 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 
 	// Disalbes the Disconnect button at start of window
 	EnableMenuItem(GetMenu(hwnd), IDM_DISCONNECT, MF_DISABLED);
-
-	ShowWindow (hwnd, nCmdShow);
-	UpdateWindow (hwnd);
 
 	return hwnd;
 }
@@ -210,7 +210,9 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 -- This function that handles the different type of window messages.
 ------------------------------------------------------------------------------------------------------------------*/
 LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
+	static HINSTANCE hInst ;
 	switch (Message){
+		//HANDLE_MSG(hwnd, WM_CREATE, Window_OnCreate);
 		HANDLE_MSG (hwnd, WM_COMMAND, Window_OnCommand);
 		HANDLE_MSG (hwnd, WM_DESTROY, Window_OnDestroy);
 	default:
@@ -236,7 +238,9 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 -- NOTES:
 -- This function deals with the selection in the menu on the main window. 
 ------------------------------------------------------------------------------------------------------------------*/
-BOOL Window_OnCreate(HWND hwnd){
+BOOL Window_OnCreate(HWND hwnd, LPARAM lParam){
+	
+	
 	OpenFileInitialize(hwnd);
 	
 	return TRUE;
@@ -268,7 +272,7 @@ BOOL Window_OnCreate(HWND hwnd){
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 	static TCHAR szFileName[MAX_PATH], szTitleName[MAX_PATH] ;
-	static HWND hwndEdit ;
+	
 	switch(id){
 		case IDM_CONNECT:
 				EnableMenuItem(GetMenu(hwnd), IDM_CONNECT, MF_DISABLED);
@@ -278,7 +282,7 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 		case IDM_SENDFILE:
 			if (FileOpenDlg(hwnd, szFileName, szTitleName)){
 				
-				if (!FileRead(hwndEdit, szFileName))
+				if (!FileRead(hwnd, szFileName))
                     {
                          OkMessage (hwnd, TEXT ("Could not read file %s!"),
                                     szTitleName) ;
@@ -510,10 +514,11 @@ void OkMessage(HWND hwnd, TCHAR* szMessage, TCHAR* szTitleName)
 -- NOTES:
 -- This function proceeds the FileOpen function and is used to read in the file.
 ------------------------------------------------------------------------------------------------------------------*/
-BOOL FileRead(HWND hwndEdit, LPCSTR pstrFileName){
+BOOL FileRead(HWND hwnd, LPCSTR pstrFileName){
 
 	HANDLE hFile;
     BOOL bSuccess = FALSE;
+	
 
     hFile = CreateFile(pstrFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
         OPEN_EXISTING, 0, NULL);
@@ -540,5 +545,38 @@ BOOL FileRead(HWND hwndEdit, LPCSTR pstrFileName){
         }
        CloseHandle(hFile);
     }
+	//DISPLAY TEXT (THIS WILL NEED TO GO IN DISPLAY FUNCTION AFTER READING A FILE
+	DisplayText(hwnd, pszFileText);
+
+	
     return bSuccess;
+}
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: DisplayText
+--
+-- DATE: November 23, 2013
+--
+-- REVISIONS: 
+--
+-- DESIGNER: Mat Siwoski
+--
+-- PROGRAMMER: Mat Siwoski
+--
+-- INTERFACE: void DisplayText(HWND hwnd, LPCSTR text)
+--				HWND hwnd: Handle to the window
+--				LPCSTR text: Pointer to the file text
+--
+-- RETURNS: -
+--
+-- NOTES:
+-- This function displays the formatted text.
+------------------------------------------------------------------------------------------------------------------*/
+void DisplayText(HWND hwnd, LPCSTR text){
+	HDC hdc;
+	RECT drawingArea;
+	
+	GetClientRect(hwnd, &drawingArea);
+	hdc = GetDC(hwnd);
+	DrawText(hdc, pszFileText, strlen(pszFileText), &drawingArea, DT_WORDBREAK);
+	ReleaseDC(hwnd, hdc);
 }

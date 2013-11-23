@@ -13,13 +13,17 @@
   <ItemGroup>
     <ClInclude Include="Includes.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="Packet.h" />
+    <ClInclude Include="Physical.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Session.h" />
+    <ClInclude Include="Transport.h" />
     <ClInclude Include="Vars.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ErrorCheck.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Packet.cpp" />
     <ClCompile Include="Physical.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="Transport.cpp" />
@@ -59,7 +63,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>E:\Dropbox\2013 BCIT Fall\COMP 3980 Internetworking 1\FINAL PROJECT\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol\boost;C:\Users\Maciu\Documents\GitHub\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol\boost;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Maciu\Documents\GitHub\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol;E:\Dropbox\2013 BCIT Fall\COMP 3980 Internetworking 1\FINAL PROJECT\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol\boost;C:\Users\Maciu\Documents\GitHub\Wireless-GRVM-Application\Wifi-Protocol\Wifi-Protocol\boost;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

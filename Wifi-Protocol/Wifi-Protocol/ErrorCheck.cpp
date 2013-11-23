@@ -24,6 +24,7 @@
 #include "Includes.h"
 #include "resource.h"
 #include "Main.h"
+
 # define TEST_SIZE 256
 
 static unsigned short crc_table [256] = {

@@ -80,7 +80,8 @@ CHAR* Packetize(FILE* bufferWithFile, int sentPacketCounter)
 
 BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 {
-    //switch (char[1])
+//HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*    //switch (char[1])
 	switch(packet[1])
 	{
 	case ENQ:
@@ -138,5 +139,6 @@ BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 		// GO back to IDLE state
 		*waitForType = ENQ;
 	break;
-    }
+    }*/
+	return TRUE;
 }

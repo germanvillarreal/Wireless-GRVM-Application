@@ -23,7 +23,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "Transport.h"
-
+int waitForType = NUL;
 int sentPacketCounter = 0;	/* Counter to keep track of our file location as
 							 as well as how many packets we've sent. */
 /*-----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ void Transmit(LPSTR* file)
 
 	do
 	{
-		packetToSend = Packetize(file, sentPacketCounter);
+		//packetToSend = Packetize(file, sentPacketCounter);
 		while (sentPacketCounter % 5 != 0)
 		{
 			// semaphore decrement (minus 1, should equal 0)
@@ -122,7 +122,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				if ((dwEvent & EV_RXCHAR) && cs.cbInQue)
 				{
 					// read from serial port
-					if(!ReadSerialPort(hComm, &packetBuffer, cs.cbInQue, &nBytesRead))
+					if(!ReadSerialPort(hComm, packetBuffer, cs.cbInQue, &nBytesRead))
 					{
 						// error
 					}
