@@ -3,8 +3,8 @@
 --
 --  PROGRAM:        Wireless Protocol (GRVM)
 --
---  FUNCTIONS:      bool SetupPort(LPTSTR)
---                  bool ConfPort(HWND*, LPTSTR)
+--  FUNCTIONS:      BOOL SetupPort(LPTSTR)
+--                  BOOL ConfPort(HWND*, LPTSTR)
 --  
 --
 --  DATE:           Nov. 16th, 2013
@@ -35,7 +35,7 @@
 -
 -	PROGRAMMER:	Vincent Lau
 -
--	INTERFACE:	bool SetupPort (LPTSTR lpszPortName)
+-	INTERFACE:	BOOL SetupPort (LPTSTR lpszPortName)
 -
 -	PARAMETERS:	LPTSTR lpszPortName - Name of the port that the device is 
 -									connected to that we want to set up.
@@ -50,7 +50,7 @@
 -			like if a handle was not closed before opening again.
 -
 -----------------------------------------------------------------------------*/
-bool SetupPort (LPTSTR lpszPortName)
+BOOL SetupPort (LPTSTR lpszPortName)
 {
     CloseHandle(hComm); // Ensures that the port can be opened more than once
 	if ((hComm = CreateFile (lpszPortName, GENERIC_READ | GENERIC_WRITE, 0,
@@ -58,9 +58,9 @@ bool SetupPort (LPTSTR lpszPortName)
 	{
 		// Failed to find COM port
 		MessageBox (NULL, TEXT("Error opening COM Port"), lpszPortName, MB_OK);
-		return false;
+		return FALSE;
 	}
-	return true; // success!
+	return TRUE; // success!
 }
 
 
@@ -88,7 +88,7 @@ bool SetupPort (LPTSTR lpszPortName)
 -			device and get+set the default timeouts for the specified port.
 -
 -----------------------------------------------------------------------------*/
-bool ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
+BOOL ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 {
 	COMMCONFIG	cc;
 	COMMTIMEOUTS comTimeout;
@@ -100,7 +100,7 @@ bool ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 	GetCommConfig (hComm, &cc, &cc.dwSize);
 	// Allow user to change settings from this config dialog
 	if (!CommConfigDialog (lpszOpenedPort, *lphwnd, &cc))
-		return false;
+		return FALSE;
 
 	/*if (!SetCommState(hComm, &cc.dcb))
 	{
@@ -111,7 +111,7 @@ bool ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 	if(!GetCommTimeouts(hComm, &comTimeout))
 	{
 		MessageBox (*lphwnd,TEXT("Couldn't get timeouts"),TEXT(""), MB_OK);
-		return false;
+		return FALSE;
 	}
 	else
 	{
@@ -124,10 +124,10 @@ bool ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 	if (!SetCommTimeouts(hComm, &comTimeout))
 	{
 		MessageBox (*lphwnd,TEXT("Couldn't set timeouts"),TEXT(""), MB_OK);
-		return false;
+		return FALSE;
 	}
 
 	PurgeComm(hComm, PURGE_RXCLEAR | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_TXABORT);
 
-    return true;
+    return TRUE;
 }

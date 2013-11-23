@@ -1,4 +1,3 @@
-
 /*-----------------------------------------------------------------------------
 --  SOURCE FILE:    Physical.cpp
 --
@@ -20,3 +19,15 @@
 --		Provides the actual sending and receiving of data functionality.
 --		
 -----------------------------------------------------------------------------*/
+#include "Physical.h"
+
+
+BOOL ReadSerialPort(HANDLE hComm, char* packetBuffer[1024], DWORD dwBytesToRead,
+					LPDWORD lpdwBytesRead)
+{
+	if (ReadFile(hComm, *packetBuffer, dwBytesToRead, lpdwBytesRead, NULL))
+	{
+		return TRUE;
+	}
+	return FALSE;
+}

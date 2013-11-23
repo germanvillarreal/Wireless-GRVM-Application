@@ -3,6 +3,7 @@
 #include "Includes.h"
 #include "Vars.h"
 #include "Packet.h"
+#include "Physical.h"
 
 // Function prototypes
 void Transmit(char*);
@@ -13,5 +14,5 @@ DWORD WINAPI ReceiveThread	(LPVOID);
 extern int waitForType;
 extern HANDLE hACKWaitSemaphore;
 extern HANDLE hComm;
-extern bool bWantToRead;
+extern BOOL bWantToRead;
 #endif

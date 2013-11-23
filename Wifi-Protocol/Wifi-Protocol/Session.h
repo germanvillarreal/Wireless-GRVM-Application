@@ -4,8 +4,8 @@
 #include "Includes.h"
 
 // Function Prototypes
-bool SetupPort (LPTSTR);
-bool ConfPort (HWND*, LPTSTR);
+BOOL SetupPort (LPTSTR);
+BOOL ConfPort (HWND*, LPTSTR);
 
 // Vars
 extern HANDLE hComm;

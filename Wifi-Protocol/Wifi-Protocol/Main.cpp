@@ -42,7 +42,7 @@ static HWND MainWindow;
 static char szAppName[] = "Windows Protocol";
 static HINSTANCE hInstance;
 static OPENFILENAME ofn;
-static bool bWantToRead = false;
+static bool bWantToRead = FALSE;
 static HANDLE hACKWaitSemaphore = INVALID_HANDLE_VALUE;
 static HANDLE hReceiveThread	= INVALID_HANDLE_VALUE;
 char szFile[260];				// buffer for file name
@@ -299,10 +299,9 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 				if (ConfPort(&MainWindow, lpszCommName))
 				{
 					// Set Read flag true
-					bWantToRead = true;
+					bWantToRead = TRUE;
 					break;
 				}
-				
 			}
 			break;
 			/*GetCommConfig(hComm, &cc, &cc.dwSize);
@@ -338,6 +337,8 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 void Window_OnDestroy (HWND hwnd){
 	CloseHandle(hACKWaitSemaphore);
 	CloseHandle(hComm);
+	TerminateThread(hReceiveThread, EXIT_SUCCESS);
+	CloseHandle(hReceiveThread);
 	PostQuitMessage(0);
 }
 

@@ -55,7 +55,7 @@ int sentPacketCounter = 0;	/* Counter to keep track of our file location as
 void Transmit(LPSTR* file)
 {
 	char*	packetToSend;
-	bool	bDoneSending = false;
+	BOOL	bDoneSending = TRUE;
 
 	do
 	{
@@ -103,7 +103,7 @@ void Transmit(LPSTR* file)
 DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 {
 	char packetBuffer[1024];
-	DWORD nBytesRead, dwEvent, dwError;
+	DWORD nBytesRead = 0, dwEvent, dwError;
 	COMSTAT cs;
 
 	// Set our Listening/Reading parameter for the serial port, want CHAR events
@@ -122,7 +122,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				if ((dwEvent & EV_RXCHAR) && cs.cbInQue)
 				{
 					// read from serial port
-					if(!ReadSerialPort(hComm, &packetBuffer, cs.cbInQue, &nBytesRead, NULL))
+					if(!ReadSerialPort(hComm, &packetBuffer, cs.cbInQue, &nBytesRead))
 					{
 						// error
 					}
@@ -134,6 +134,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				}
 			}
 		}
+		Sleep(250);
 	}
 
 	ExitThread(EXIT_SUCCESS);
