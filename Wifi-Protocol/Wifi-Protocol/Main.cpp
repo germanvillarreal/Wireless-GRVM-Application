@@ -42,7 +42,9 @@ static HWND MainWindow;
 static char szAppName[] = "Windows Protocol";
 static HINSTANCE hInstance;
 static OPENFILENAME ofn;
+static bool bWantToRead = false;
 static HANDLE hACKWaitSemaphore = INVALID_HANDLE_VALUE;
+static HANDLE hReceiveThread	= INVALID_HANDLE_VALUE;
 char szFile[260];				// buffer for file name
 HANDLE hf;						// file handle
 HANDLE hComm;
@@ -74,6 +76,7 @@ LPSTR pszFileText;
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
 {
 	MSG Msg;
+	DWORD dwReceiveThreadID;
 
 	if (!hPrevInstance){
 		if (!Register(hInst)){
@@ -90,10 +93,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	// Non-Window related inits
 	hComm = 0;
 	hACKWaitSemaphore = CreateSemaphore(NULL, 1, 1, NULL);
+	hReceiveThread	  = CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
 
 	if(hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE)
 	{
-
+		MessageBox(MainWindow, TEXT("Couldn't acquire semaphores"), TEXT("Creation error"), MB_OK);
+		return EXIT_FAILURE;
 	}
 
 	while (GetMessage (&Msg, NULL, 0, 0))
@@ -292,13 +297,17 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 			if(SetupPort(lpszCommName))
 			{
 				if (ConfPort(&MainWindow, lpszCommName))
+				{
+					// Set Read flag true
+					bWantToRead = true;
 					break;
+				}
+				
 			}
-
+			break;
 			/*GetCommConfig(hComm, &cc, &cc.dwSize);
 			if (!CommConfigDialog (lpszCommName, hwnd, &cc)) 
 				break;*/ 
-			break;
 		case IDM_ABOUT:
 			DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc) ;
 			break;

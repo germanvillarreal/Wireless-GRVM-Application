@@ -7,8 +7,11 @@
 // Function prototypes
 void Transmit(char*);
 BOOL PacketCheck(HWND, char[1024], int*);
+DWORD WINAPI ReceiveThread	(LPVOID);
 
 // Vars
 extern int waitForType;
 extern HANDLE hACKWaitSemaphore;
+extern HANDLE hComm;
+extern bool bWantToRead;
 #endif

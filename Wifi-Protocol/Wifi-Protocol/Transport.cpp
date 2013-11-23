@@ -74,3 +74,67 @@ void Transmit(LPSTR* file)
 		// Another semaphore to determine when to start again.
 	} while(!bDoneSending); //file not done
 }
+
+
+/*-----------------------------------------------------------------------------
+-	FUNCTION:	ReceiveThread
+-
+-	DATE:		November 22st, 2013
+-
+-	REVISIONS:	...
+-
+-	DESIGNER:	Vincent Lau
+-
+-	PROGRAMMER:	Vincent Lau
+-
+-	INTERFACE:	DWORD WINAPI ReceiveThread (LPVOID lphwnd)
+-		
+-	RETURNS:	DWORD - a success or failure value on thread exit.
+-				
+-	PARAMETERS:	LPVOID lphwnd - reference to the main window's handle (HWND)
+-
+-	NOTES:	This is the primary thread for receiving packets from the serial
+-			port. It runs forever until the program exits, but does not run its
+-			read loop until the port has been configured. 
+-			This is to be fully event-driven for serial ports. 
+-			References were used, mainly the event-driven tty given earlier.
+-
+-----------------------------------------------------------------------------*/
+DWORD WINAPI ReceiveThread(LPVOID lphwnd)
+{
+	char packetBuffer[1024];
+	DWORD nBytesRead, dwEvent, dwError;
+	COMSTAT cs;
+
+	// Set our Listening/Reading parameter for the serial port, want CHAR events
+	SetCommMask(hComm, EV_RXCHAR);
+
+	while (1) // forever
+	{
+		while (bWantToRead) // while we want to read
+		{
+			// wait for event
+			if (WaitCommEvent(hComm, &dwEvent, NULL))
+			{
+				// Comm Event happened!
+				// reset the comm errors
+				ClearCommError(hComm, &dwError, &cs);
+				if ((dwEvent & EV_RXCHAR) && cs.cbInQue)
+				{
+					// read from serial port
+					if(!ReadSerialPort(hComm, &packetBuffer, cs.cbInQue, &nBytesRead, NULL))
+					{
+						// error
+					}
+					else
+					{
+						// read success
+						// PacketCheck
+					}
+				}
+			}
+		}
+	}
+
+	ExitThread(EXIT_SUCCESS);
+}

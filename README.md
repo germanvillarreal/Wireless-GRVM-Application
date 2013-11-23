@@ -6,7 +6,7 @@ one device to another and displays the information on a computer monitor. This p
 driven and will work as a half-duplex. The protocol used for this program is the (Be Creative) Protocol 
 and will be run on Windows 7.
 
-Programmers:
+Developers:
   Vincent Lau
   German Villarreal
   Mateusz Siwoski
