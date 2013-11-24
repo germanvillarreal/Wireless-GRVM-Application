@@ -41,12 +41,12 @@
 #include "Resource.h"
 
 static HWND MainWindow;
-static char szAppName[] = "Windows Protocol";
+static char szAppName[]		= "Windows Protocol";
 static HINSTANCE hInstance;
 static OPENFILENAME ofn;
-BOOL bWantToRead = FALSE;
-HANDLE hACKWaitSemaphore = INVALID_HANDLE_VALUE;
-HANDLE hReceiveThread	= INVALID_HANDLE_VALUE;
+BOOL bWantToRead			= FALSE;
+HANDLE hACKWaitSemaphore	= INVALID_HANDLE_VALUE;
+HANDLE hReceiveThread		= INVALID_HANDLE_VALUE;
 char szFile[260];				// buffer for file name
 HANDLE hf;						// file handle
 HANDLE hComm;
@@ -90,13 +90,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	}
 	ShowWindow (MainWindow, nCmdShow);
 	UpdateWindow (MainWindow);
-	cc.dwSize = sizeof(COMMCONFIG);
-	cc.wVersion = 0x100;
+	cc.dwSize			= sizeof(COMMCONFIG);
+	cc.wVersion			= 0x100;
 	
 	// Non-Window related inits
 	hComm = 0;
-	hACKWaitSemaphore = CreateSemaphore(NULL, 0, 1, NULL);
-	hReceiveThread	  = CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
+	hACKWaitSemaphore	= CreateSemaphore(NULL, 0, 1, NULL);
+	hReceiveThread		= CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
 
 	if(hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE)
 	{
@@ -118,6 +118,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 -- DATE: November 12, 2013
 --
 -- REVISIONS: 
+-- November 23, 2013 - Mateusz Siwoski: Added Icon to program
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -137,7 +138,7 @@ BOOL Register(HINSTANCE hInst)
 
 	memset (&W, 0, sizeof(WNDCLASS));
 	W.style			= CS_HREDRAW | CS_VREDRAW;
-	W.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
+	W.hIcon			= LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_MYICON));
 	W.hCursor		= LoadCursor (NULL, IDC_ARROW);
 	W.lpfnWndProc	= WndProc;
 	W.hInstance		= hInst;
@@ -182,7 +183,7 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 		return hwnd;
 	nCmdShow = SW_SHOW;
 
-	// Disalbes the Disconnect button at start of window
+	// Disables the Disconnect button at start of window
 	EnableMenuItem(GetMenu(hwnd), IDM_DISCONNECT, MF_DISABLED);
 
 	return hwnd;
@@ -457,6 +458,7 @@ BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 	}
 	return FALSE ;
 }
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: OpenFileInitialize
 --
@@ -499,6 +501,7 @@ void OpenFileInitialize(HWND hwnd){
     ofn.lpfnHook          = NULL ;
     ofn.lpTemplateName    = NULL ;
 }
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: FileOpenDlg
 --
@@ -535,6 +538,7 @@ BOOL FileOpenDlg(HWND hwnd, PTSTR pstrFileName, LPCSTR pstrTitleName){
 
     return(GetOpenFileName(&ofn));
 }
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: OkMessage
 --
@@ -559,9 +563,7 @@ BOOL FileOpenDlg(HWND hwnd, PTSTR pstrFileName, LPCSTR pstrTitleName){
 void OkMessage(HWND hwnd, TCHAR* szMessage, TCHAR* szTitleName)
 {
      TCHAR szBuffer[64 + MAX_PATH] ;
-     
      wsprintf (szBuffer, szMessage, szTitleName[0] ? szTitleName : UNTITLED) ;
-     
      MessageBox (hwnd, szBuffer, szAppName, MB_OK | MB_ICONEXCLAMATION) ;
 }
 

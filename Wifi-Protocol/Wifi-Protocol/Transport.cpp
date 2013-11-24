@@ -54,11 +54,13 @@ int sentPacketCounter = 0;	/* Counter to keep track of our file location as
 
 void Transmit(LPSTR* file)
 {
-	char*	packetToSend;
+	char*	packetToSend = "A";
 	BOOL	bDoneSending = FALSE;
 
 	do
 	{
+
+//***************************HAD TO COMMENT THIS CODE OUT TO GET IT RUNNING**********************************//
 		//packetToSend = Packetize(file, sentPacketCounter);
 		while (sentPacketCounter % 5 != 0)
 		{

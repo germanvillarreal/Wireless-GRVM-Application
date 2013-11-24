@@ -31,6 +31,9 @@
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E000ABE4-8B3C-49D4-85E8-6305D29B8277}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
