@@ -17,19 +17,20 @@
 -- BOOL FileRead(HWND, PTSTR)
 -- void OkMessage(HWND, TCHAR*, TCHAR*)
 -- void DisplayText(HWND, LPCSTR)
+-- void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos)
 --
 -- DATE: November 12, 2013
 --
 -- REVISIONS:  
 -- November 12, 2013 - Mat Siwoski: Added Window_OnCreate, OpenFileInitialize, FileOpenDlg & FileRead
--- November 23, 2013 - Mat Siwoski: Added DisplayText
+-- November 23, 2013 - Mat Siwoski: Added DisplayText, Window_OnVScroll
 --
 -- DESIGNER: Mat Siwoski
 --
 -- PROGRAMMER: Mat Siwoski
 --
 -- NOTES:
---    
+-- Main GUI for the program.   
 --
 ----------------------------------------------------------------------------------------------------------------------*/
 
@@ -94,7 +95,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	
 	// Non-Window related inits
 	hComm = 0;
-	hACKWaitSemaphore = CreateSemaphore(NULL, 1, 1, NULL);
+	hACKWaitSemaphore = CreateSemaphore(NULL, 0, 1, NULL);
 	hReceiveThread	  = CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
 
 	if(hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE)
@@ -212,13 +213,86 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 	static HINSTANCE hInst ;
 	switch (Message){
-		//HANDLE_MSG(hwnd, WM_CREATE, Window_OnCreate);
+		HANDLE_MSG(hwnd, WM_CREATE, Window_OnCreate);
 		HANDLE_MSG (hwnd, WM_COMMAND, Window_OnCommand);
+		HANDLE_MSG(hwnd, WM_VSCROLL, Window_OnVScroll);
 		HANDLE_MSG (hwnd, WM_DESTROY, Window_OnDestroy);
 	default:
 		return DefWindowProc (hwnd, Message, wParam, lParam);
 	}
 }
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: Window_OnVScroll
+--
+-- DATE: November 23, 2013
+--
+-- REVISIONS: 
+--
+-- DESIGNER: Mat Siwoski
+--
+-- PROGRAMMER: Mat Siwoski
+--
+-- INTERFACE: void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos)
+--				HWND hwnd: Handle to the window
+--				HWND hwndCtl: Handle to the control
+--				UINT code: Code
+--				int pos: Position
+--
+-- RETURNS: -
+--
+-- NOTES:
+-- This function handles the Scrolling for the window.
+------------------------------------------------------------------------------------------------------------------*/
+void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
+	SCROLLINFO  si ;
+	int iVertPos;
+	
+	si.cbSize = sizeof (si) ;
+	si.fMask  = SIF_ALL ;
+	GetScrollInfo (hwnd, SB_VERT, &si) ;
+	iVertPos = si.nPos ;
+	
+	switch (code)
+	{
+		case SB_TOP:
+			si.nPos = si.nMin ;
+		break ;
+		case SB_BOTTOM:
+			si.nPos = si.nMax ;
+		break ;
+		case SB_LINEUP:
+			si.nPos -= 1 ;
+		break ;
+		case SB_LINEDOWN:
+			si.nPos += 1 ;
+		break ;
+		case SB_PAGEUP:
+			si.nPos -= si.nPage ;
+		break ;
+		case SB_PAGEDOWN:
+			si.nPos += si.nPage ;
+			break ;
+		case SB_THUMBTRACK:
+			si.nPos = si.nTrackPos ;
+			break ;
+		default:
+			break ;         
+	}
+	si.fMask = SIF_POS ;
+    SetScrollInfo (hwnd, SB_VERT, &si, TRUE) ;
+    GetScrollInfo (hwnd, SB_VERT, &si) ;
+
+    // If the position has changed, scroll the window and update it
+
+    if (si.nPos != iVertPos)
+    {                    
+        ScrollWindow (hwnd, 0, (iVertPos - si.nPos), 
+                            NULL, NULL) ;
+        UpdateWindow (hwnd) ;
+    }
+}
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: Window_OnCreate
 --
@@ -238,11 +312,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 -- NOTES:
 -- This function deals with the selection in the menu on the main window. 
 ------------------------------------------------------------------------------------------------------------------*/
-BOOL Window_OnCreate(HWND hwnd, LPARAM lParam){
-	
-	
+BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 	OpenFileInitialize(hwnd);
-	
 	return TRUE;
 }
 /*------------------------------------------------------------------------------------------------------------------
