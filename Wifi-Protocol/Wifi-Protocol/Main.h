@@ -12,7 +12,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL Register(HINSTANCE);
 HWND Create(HINSTANCE, int);
-BOOL Window_OnCreate(HWND, LPARAM);
+BOOL Window_OnCreate(HWND, LPCREATESTRUCT);
 void Window_OnCommand (HWND, int, HWND, UINT);
 void Window_OnDestroy (HWND);
 BOOL CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM);
@@ -22,6 +22,7 @@ BOOL FileRead(HWND, LPCSTR);
 void OkMessage(HWND, TCHAR*, TCHAR*);
 BOOL ErrorCheck(char);
 void DisplayText(HWND, LPCSTR);
+void Window_OnVScroll(HWND, HWND, UINT, int);
 
 // Variables
 const LPTSTR lpszCommName	= TEXT("COM1");
