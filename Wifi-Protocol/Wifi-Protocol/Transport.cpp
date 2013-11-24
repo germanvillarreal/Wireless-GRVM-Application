@@ -55,21 +55,27 @@ int sentPacketCounter = 0;	/* Counter to keep track of our file location as
 void Transmit(LPSTR* file)
 {
 	char*	packetToSend;
-	BOOL	bDoneSending = TRUE;
+	BOOL	bDoneSending = FALSE;
 
 	do
 	{
 		//packetToSend = Packetize(file, sentPacketCounter);
 		while (sentPacketCounter % 5 != 0)
 		{
-			// semaphore decrement (minus 1, should equal 0)
-			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
-			// sendDataPacket(packetToSend);
-			sentPacketCounter = 0;
+					
+			while(1) // Send packet to serial port
+			{	
+				if(SendData(hComm, packetToSend))
+					break;
+			}
 			// Set "What we're waiting for" to ACK
 			waitForType = ACK;
+
 			// semaphore decrement (minus 1, should try to equal -1 and block)
 			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
+
+			// Increment sent counter
+			++sentPacketCounter;
 		}
 		// Another semaphore to determine when to start again.
 	} while(!bDoneSending); //file not done
