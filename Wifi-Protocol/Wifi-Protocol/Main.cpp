@@ -4,12 +4,12 @@
 -- PROGRAM: Wireless-GRVM
 --
 -- FUNCTIONS:
--- int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
--- BOOL Register(HINSTANCE hInst)
--- HWND Create(HINSTANCE hInst, int nCmdShow)
--- LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
--- BOOL Window_OnCreate(HWND hwnd)
--- void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
+-- int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+-- BOOL Register(HINSTANCE)
+-- HWND Create(HINSTANCE, int)
+-- LRESULT CALLBACK WndProc (HWND, UINT, WPARAM, LPARAM)
+-- BOOL Window_OnCreate(HWND)
+-- void Window_OnCommand (HWND, int, HWND, UINT)
 -- void Window_OnDestroy (HWND);
 -- BOOL CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM);
 -- void OpenFileInitialize(HWND )
@@ -17,7 +17,7 @@
 -- BOOL FileRead(HWND, PTSTR)
 -- void OkMessage(HWND, TCHAR*, TCHAR*)
 -- void DisplayText(HWND, LPCSTR)
--- void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos)
+-- void Window_OnVScroll(HWND, HWND, UINT, int)
 --
 -- DATE: November 12, 2013
 --
@@ -62,7 +62,8 @@ SCROLLINFO  si ;
 --
 -- DATE: November 12, 2013
 --
--- REVISIONS: 2013/11/25 - Vincent - Added Semaphore creation and error checking
+-- REVISIONS:
+-- November 25, 2013 - Vincent Lau: Added Semaphore creation and error checking
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -163,7 +164,8 @@ BOOL Register(HINSTANCE hInst)
 -- DATE: November 12, 2013
 --
 -- REVISIONS: 
--- November 23, 2013 - Added scroll bars to window
+-- November 23, 2013 - Mateusz Siwoski: Added scroll bars to window
+-- November 25, 2013 - Mateusz Siwoski: Corrected Scroll Bars
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -182,7 +184,7 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 {
 	//hInstance = hInst;
 
-	HWND hwnd = CreateWindow (szAppName, szAppName, WS_OVERLAPPEDWINDOW | WS_HSCROLL | WS_VSCROLL,
+	HWND hwnd = CreateWindow (szAppName, szAppName, WS_OVERLAPPEDWINDOW |  WS_VSCROLL,
 		CW_USEDEFAULT, CW_USEDEFAULT, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, NULL, hInst, NULL);
 
 	if (hwnd == NULL)
@@ -494,7 +496,8 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 --
 -- DATE: November 12, 2013
 --
--- REVISIONS: 2013/11/21 - Vincent - Added cleanup
+-- REVISIONS: 
+-- November 21, 2013 - Vincent Lau: Added cleanup
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -577,26 +580,26 @@ BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 ------------------------------------------------------------------------------------------------------------------*/
 void OpenFileInitialize(HWND hwnd){
 	static TCHAR szFilter[] = TEXT ("Text Files (*.TXT)\0*.txt\0");
-	ofn.lStructSize       = sizeof (OPENFILENAME) ;
-    ofn.hwndOwner         = hwnd ;
-    ofn.hInstance         = NULL ;
-    ofn.lpstrFilter       = szFilter ;
-    ofn.lpstrCustomFilter = NULL ;
-    ofn.nMaxCustFilter    = 0 ;
-    ofn.nFilterIndex      = 0 ;
-    ofn.lpstrFile         = NULL ;          // Set in Open and Close functions
-    ofn.nMaxFile          = MAX_PATH ;
-    ofn.lpstrFileTitle    = NULL ;          // Set in Open and Close functions
-    ofn.nMaxFileTitle     = MAX_PATH ;
-    ofn.lpstrInitialDir   = NULL ;
-    ofn.lpstrTitle        = NULL ;
-    ofn.Flags             = 0 ;             // Set in Open and Close functions
-    ofn.nFileOffset       = 0 ;
-    ofn.nFileExtension    = 0 ;
-    ofn.lpstrDefExt       = TEXT ("txt") ;
-    ofn.lCustData         = 0L ;
-    ofn.lpfnHook          = NULL ;
-    ofn.lpTemplateName    = NULL ;
+	ofn.lStructSize			= sizeof (OPENFILENAME) ;
+    ofn.hwndOwner			= hwnd ;
+    ofn.hInstance			= NULL ;
+    ofn.lpstrFilter			= szFilter ;
+    ofn.lpstrCustomFilter	= NULL ;
+    ofn.nMaxCustFilter		= 0 ;
+    ofn.nFilterIndex		= 0 ;
+    ofn.lpstrFile			= NULL ;          // Set in Open and Close functions
+    ofn.nMaxFile			= MAX_PATH ;
+    ofn.lpstrFileTitle		= NULL ;          // Set in Open and Close functions
+    ofn.nMaxFileTitle		= MAX_PATH ;
+    ofn.lpstrInitialDir		= NULL ;
+    ofn.lpstrTitle			= NULL ;
+    ofn.Flags				= 0 ;             // Set in Open and Close functions
+    ofn.nFileOffset			= 0 ;
+    ofn.nFileExtension		= 0 ;
+    ofn.lpstrDefExt			= TEXT ("txt") ;
+    ofn.lCustData			= 0L ;
+    ofn.lpfnHook			= NULL ;
+    ofn.lpTemplateName		= NULL ;
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -626,11 +629,11 @@ BOOL FileOpenDlg(HWND hwnd, PTSTR pstrFileName, LPCSTR pstrTitleName){
     ZeroMemory(&ofn, sizeof(ofn));
 
     ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
-    ofn.hwndOwner = hwnd;
+    ofn.hwndOwner	= hwnd;
     ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
-	ofn.lpstrFile = pstrFileName;
-    ofn.nMaxFile = MAX_PATH;
-    ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrFile	= pstrFileName;
+    ofn.nMaxFile	= MAX_PATH;
+    ofn.Flags		= OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
     ofn.lpstrDefExt = "txt";
 
     return(GetOpenFileName(&ofn));
@@ -689,9 +692,7 @@ BOOL FileRead(HWND hwnd, LPCSTR pstrFileName){
 	HANDLE hFile;
     BOOL bSuccess = FALSE;
 	
-
-    hFile = CreateFile(pstrFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-        OPEN_EXISTING, 0, NULL);
+    hFile = CreateFile(pstrFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     if(hFile != INVALID_HANDLE_VALUE)
     {
         DWORD dwFileSize;
@@ -720,6 +721,7 @@ BOOL FileRead(HWND hwnd, LPCSTR pstrFileName){
 	
     return bSuccess;
 }
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: DisplayText
 --
