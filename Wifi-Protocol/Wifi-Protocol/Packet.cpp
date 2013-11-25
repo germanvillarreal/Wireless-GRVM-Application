@@ -13,6 +13,8 @@
 --
 --  REVISIONS:      2013/11/20 - German Villarreal
 --                  Added PacketCheck function
+--					2013/11/24
+--					Packetize parameter FILE* changed to CHAR*
 --
 --  DESIGNER:       
 --
@@ -29,22 +31,33 @@
 
 #include "Packet.h"
 
-CHAR* Packetize(FILE* bufferWithFile, int sentPacketCounter)
+CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 {
 	char data[PACKET_BYTES_DATA];
 	char packet[PACKET_BYTES_TOTAL];
-	size_t ndx;
+	//size_t ndx;
+	size_t fileSize = strlen(bufferWithFile);
 
 	//1020 x sentPacketCounter = startingLocation
 	int StartLoc = PACKET_BYTES_DATA * sentPacketCounter;
-
-	// Go to the begining of the line
-	if(fseek(bufferWithFile, StartLoc, SEEK_SET) != 0)
+	if(StartLoc * PACKET_BYTES_DATA > fileSize)
 	{
-		fprintf(stderr, "%s", "Unable to seek to the next line..");
-		//return
+		fprintf(stderr, "%s", "Cannot seek to this location..");
+		return 0;
 	}
 
+	for(size_t i = StartLoc; i < PACKET_BYTES_DATA; i++)
+	{
+		if(bufferWithFile[i] == '\0' || bufferWithFile[i] == EOF)
+		{
+			data[i] = '\0';
+		}
+		data[i] = bufferWithFile[i];
+	}
+	
+/*
+	// Go to the begining of the line
+	
 	// Read 1020 chars from the file buffer, starting at startingLocation into packet string
 	if(fgets(data, PACKET_BYTES_DATA, bufferWithFile) == NULL)
 	{
@@ -64,7 +77,7 @@ CHAR* Packetize(FILE* bufferWithFile, int sentPacketCounter)
 	{
 		data[ndx] = '\0';
 	}
-
+	*/
 	// Add control bytes to the packet
 	packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
 
