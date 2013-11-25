@@ -31,7 +31,7 @@
 
 #include "Packet.h"
 
-CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter)
+CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter, BOOL* isDone)
 {
 	char data[PACKET_BYTES_DATA];
 	char packet[PACKET_BYTES_TOTAL];
@@ -51,6 +51,7 @@ CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 		if(bufferWithFile[i] == '\0' || bufferWithFile[i] == EOF)
 		{
 			data[i] = '\0';
+			*isDone = TRUE;
 		}
 		data[i] = bufferWithFile[i];
 	}
