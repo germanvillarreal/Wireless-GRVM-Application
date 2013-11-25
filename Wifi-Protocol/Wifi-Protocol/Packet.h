@@ -14,7 +14,7 @@
 
 
 // Function Prototypes
-CHAR* Packetize(FILE*, int, BOOL*);
+CHAR* Packetize(CHAR*, int, BOOL*);
 BOOL PacketCheck(HWND, char[1024], int*);
 
 // vars

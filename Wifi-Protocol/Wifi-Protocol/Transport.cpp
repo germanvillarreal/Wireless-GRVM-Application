@@ -29,6 +29,7 @@ INT sentPacketCounter = 0;	/* Counter to keep track of our file location as
 INT receivedPacketCounter = 0; /* Counter to keep track of how many the other 
 								computer has transmitted */
 BOOL bHaveFileToSend = FALSE;
+LPSTR	packetToSend;		/* Global packet buffer */
 
 /*-----------------------------------------------------------------------------
 -	FUNCTION:	Transmit
@@ -59,10 +60,9 @@ BOOL bHaveFileToSend = FALSE;
 
 DWORD WINAPI TransmitThread(LPVOID param)
 {
-	LPSTR	packetToSend;
+	
 	LPSTR	file = (LPSTR)param;
 	BOOL	bDoneSending = FALSE;
-	OVERLAPPED osWriter = {0};
 	
 	sentPacketCounter = 0;
 	bHaveFileToSend = TRUE;
@@ -75,7 +75,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 					
 			while(1) // Send packet to serial port
 			{	
-				if(SendData(hComm, packetToSend, &osWriter))
+				if(SendData(hComm, packetToSend))
 					break;
 			}
 			// Set "What we're waiting for" to ACK
@@ -126,12 +126,11 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 {
 	CHAR packetBuffer[1024];
 	DWORD nBytesRead = 0, dwEvent, dwError, dwWaitValue;
-	OVERLAPPED osReader = {0};
 	COMSTAT cs;
 
 	// Create the overlapped event. MUST CLOSE!!!
-	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (osReader.hEvent == NULL)
+	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (ov.hEvent == NULL)
 	{
 		MessageBox(NULL, TEXT("Error creating Overlapped event"), NULL, MB_OK);
 		ExitThread(EXIT_FAILURE);
@@ -147,19 +146,17 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 	{
 		while (bWantToRead) // while we want to read
 		{
-			WaitCommEvent(hComm, &dwEvent, &osReader);
-			dwWaitValue = WaitForSingleObject(osReader.hEvent, INFINITE);
+			WaitCommEvent(hComm, &dwEvent, &ov);
+			dwWaitValue = WaitForSingleObject(ov.hEvent, INFINITE);
 			ClearCommError(hComm, &dwError, &cs);
 			if (dwWaitValue == WAIT_OBJECT_0 && (dwEvent & EV_RXCHAR)) // signaled with event char receive
 			{
 				// read SUCCESS!!!!!
 				//MessageBox(NULL, TEXT("WFSO success"), NULL, MB_OK); //debug
-				if (ReadSerialPort(hComm, packetBuffer, cs.cbInQue, &nBytesRead, &osReader))
+				if (ReadSerialPort(hComm, packetBuffer, cs.cbInQue, &nBytesRead))
 				{	
 					// Successful read, send to packet check
 
-					// send to display - CAN BE DONE IN PACKETCHECK
-					
 					// increment to counter and check - NEEDS TO BE PASSED TO PACKETCHECK
 					if (++receivedPacketCounter % 5 == 0)
 					{
@@ -175,7 +172,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 			{
 				MessageBox(NULL, TEXT("Receive WFSO error"), NULL, MB_OK);
 			}
-			ResetEvent(osReader.hEvent);
+			ResetEvent(ov.hEvent);
 		} //while want to read
 	} //while forever
 
@@ -208,6 +205,6 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 		}
 		Sleep(250);
 	}*/
-	CloseHandle(osReader.hEvent);
+	CloseHandle(ov.hEvent);
 	ExitThread(EXIT_SUCCESS);
 }

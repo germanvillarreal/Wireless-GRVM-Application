@@ -15,5 +15,6 @@ DWORD WINAPI ReceiveThread	(LPVOID);
 extern HANDLE hACKWaitSemaphore;
 extern HANDLE hFileWaitSemaphore;
 extern HANDLE hComm;
+extern OVERLAPPED ov;
 extern BOOL bWantToRead;
 #endif
