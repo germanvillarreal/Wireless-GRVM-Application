@@ -9,7 +9,7 @@
 --                  SendData(HANDLE hComm, char* packet, LPOVERLAPPED lpOV)
 --  
 --
---  DATE:           
+--  DATE:           Nov. 22-24, 2013
 --
 --  REVISIONS:      ...
 --
@@ -61,7 +61,7 @@ BOOL ReadSerialPort(HANDLE hComm, char packetBuffer[1024], DWORD dwBytesToRead,
 /*-----------------------------------------------------------------------------
 -	FUNCTION:	SendControl
 -
--	DATE:		November 23, 2013
+-	DATE:		November 24, 2013
 -
 -	REVISIONS:	...
 -
