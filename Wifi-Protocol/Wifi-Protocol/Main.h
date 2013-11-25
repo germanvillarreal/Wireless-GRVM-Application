@@ -7,6 +7,9 @@
 
 #define UNTITLED TEXT ("(untitled)")
 #define EDITID   1
+#define WINDOW_HEIGHT	400
+#define WINDOW_WIDTH	600
+
 
 // Function Prototypes
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -23,11 +26,9 @@ void OkMessage(HWND, TCHAR*, TCHAR*);
 BOOL ErrorCheck(char);
 void DisplayText(HWND, LPCSTR);
 void Window_OnVScroll(HWND, HWND, UINT, int);
-
+void Window_OnPaint(HWND);
+void Window_OnSize(HWND hwnd, UINT state, int cx, int cy);
 // Variables
 const LPTSTR lpszCommName	= TEXT("COM1");
-
-
-
 
 #endif

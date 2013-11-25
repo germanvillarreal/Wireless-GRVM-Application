@@ -23,7 +23,8 @@
 --
 -- REVISIONS:  
 -- November 12, 2013 - Mat Siwoski: Added Window_OnCreate, OpenFileInitialize, FileOpenDlg & FileRead
--- November 23, 2013 - Mat Siwoski: Added DisplayText, Window_OnVScroll
+-- November 23, 2013 - Mat Siwoski: Added DisplayText, Window_OnVScroll & custom Icon
+-- November 24, 2013 - Mat Siwoski: Added Window_OnPaint, Window_OnSize
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -51,7 +52,9 @@ char szFile[260];				// buffer for file name
 HANDLE hf;						// file handle
 HANDLE hComm;
 COMMCONFIG cc;
-LPSTR pszFileText, pText;
+LPSTR pszFileText;
+SCROLLINFO  si ;
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: WinMain
 --
@@ -77,7 +80,7 @@ LPSTR pszFileText, pText;
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
 {
 	MSG Msg;
-	DWORD dwReceiveThreadID;
+	
 
 	if (!hPrevInstance){
 		if (!Register(hInst)){
@@ -96,7 +99,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	// Non-Window related inits
 	hComm = 0;
 	hACKWaitSemaphore	= CreateSemaphore(NULL, 0, 1, NULL);
-	hReceiveThread		= CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
+	//hReceiveThread		= CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
 
 	if(hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE)
 	{
@@ -177,7 +180,7 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 	//hInstance = hInst;
 
 	HWND hwnd = CreateWindow (szAppName, szAppName, WS_OVERLAPPEDWINDOW | WS_HSCROLL | WS_VSCROLL,
-		CW_USEDEFAULT, CW_USEDEFAULT, 600, 400, NULL, NULL, hInst, NULL);
+		CW_USEDEFAULT, CW_USEDEFAULT, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, NULL, hInst, NULL);
 
 	if (hwnd == NULL)
 		return hwnd;
@@ -195,6 +198,8 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 -- DATE: November 12, 2013
 --
 -- REVISIONS: 
+-- November 23, 2013 - Mat Siwoski: Added Window_OnVScroll
+-- November 24, 2013 - Mat Siwoski: Added Window_OnPaint
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -215,12 +220,94 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	static HINSTANCE hInst ;
 	switch (Message){
 		HANDLE_MSG(hwnd, WM_CREATE, Window_OnCreate);
-		HANDLE_MSG (hwnd, WM_COMMAND, Window_OnCommand);
+		HANDLE_MSG(hwnd, WM_COMMAND, Window_OnCommand);
 		HANDLE_MSG(hwnd, WM_VSCROLL, Window_OnVScroll);
-		HANDLE_MSG (hwnd, WM_DESTROY, Window_OnDestroy);
+		HANDLE_MSG(hwnd, WM_SIZE, Window_OnSize);
+		HANDLE_MSG(hwnd, WM_PAINT, Window_OnPaint);
+		HANDLE_MSG(hwnd, WM_DESTROY, Window_OnDestroy);
 	default:
 		return DefWindowProc (hwnd, Message, wParam, lParam);
 	}
+}
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: Window_OnSize
+--
+-- DATE: November 12, 2013
+--
+-- REVISIONS: 
+-- November 23, 2013 - Mat Siwoski: Added Window_OnVScroll
+-- November 24, 2013 - Mat Siwoski: Added Window_OnPaint
+--
+-- DESIGNER: Mat Siwoski
+--
+-- PROGRAMMER: Mat Siwoski
+--
+-- INTERFACE: void Window_OnSize(HWND hwnd, UINT state, int cx, int cy)
+--				HWND hwnd: Handle to the window
+--				UINT state: The message
+--				int cx: Parameter for lparam
+--				int cy: Parameter for lparam 
+--
+-- RETURNS: 
+--
+-- NOTES:
+-- This function that handles the dimensions for the window size.
+------------------------------------------------------------------------------------------------------------------*/
+void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
+	RECT drawingArea;
+
+	GetClientRect(hwnd, &drawingArea);
+
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_ALL;
+	si.nMin = 0;
+	//********************************************THIS IS MY ISSUE******************************************************//
+	si.nMax = cy*12;
+	si.nPage = 30;
+	si.nPos = 0;
+	
+	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+}
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: Window_OnPaint
+--
+-- DATE: November 23, 2013
+--
+-- REVISIONS: 
+--
+-- DESIGNER: Mat Siwoski
+--
+-- PROGRAMMER: Mat Siwoski
+--
+-- INTERFACE: void Window_OnPaint(HWND hwnd)
+--				HWND hwnd: Handle to the window
+--
+-- RETURNS: -
+--
+-- NOTES:
+-- This function repaints the window (specifically when scrollbar is pressed)
+------------------------------------------------------------------------------------------------------------------*/
+void Window_OnPaint(HWND hwnd){
+	PAINTSTRUCT ps;
+	int iVertPos, iHorzPos;
+	RECT drawingArea;
+	HDC hdc = BeginPaint (hwnd, &ps) ;
+	
+	GetClientRect(hwnd, &drawingArea);
+    si.cbSize = sizeof (si) ;
+    si.fMask  = SIF_POS ;
+    GetScrollInfo (hwnd, SB_VERT, &si) ;
+    iVertPos = si.nPos ;
+	GetScrollInfo (hwnd, SB_HORZ, &si) ;
+    iHorzPos = si.nPos ;
+	drawingArea.top -= iVertPos;
+	if (pszFileText != NULL){
+		DrawText (hdc, pszFileText, -1, &drawingArea, DT_EXPANDTABS | DT_WORDBREAK) ;
+	}
+	UpdateWindow(hwnd);
+	EndPaint(hwnd, &ps);
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -246,9 +333,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 -- This function handles the Scrolling for the window.
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
-	SCROLLINFO  si ;
 	int iVertPos;
-	
 	si.cbSize = sizeof (si) ;
 	si.fMask  = SIF_ALL ;
 	GetScrollInfo (hwnd, SB_VERT, &si) ;
@@ -285,11 +370,12 @@ void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
     GetScrollInfo (hwnd, SB_VERT, &si) ;
 
     // If the position has changed, scroll the window and update it
-
+	//GetClientRect(hwnd, &drawingArea);
     if (si.nPos != iVertPos)
-    {                    
+    {          
         ScrollWindow (hwnd, 0, (iVertPos - si.nPos), 
                             NULL, NULL) ;
+		//InvalidateRect(hwnd, &drawingArea, TRUE);
         UpdateWindow (hwnd) ;
     }
 }
@@ -317,6 +403,7 @@ BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 	OpenFileInitialize(hwnd);
 	return TRUE;
 }
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: Window_OnCommand
 --
@@ -353,9 +440,7 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 			break;
 		case IDM_SENDFILE:
 			if (FileOpenDlg(hwnd, szFileName, szTitleName)){
-				
-				if (!FileRead(hwnd, szFileName))
-                    {
+				if (!FileRead(hwnd, szFileName)){
                          OkMessage (hwnd, TEXT ("Could not read file %s!"),
                                     szTitleName) ;
                          szFileName[0]  = '\0' ;
@@ -369,20 +454,18 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 			DrawMenuBar(hwnd);
 			break;
 		case IDM_CONFIG:
-			
-			if(SetupPort(lpszCommName))
-			{
-				if (ConfPort(&MainWindow, lpszCommName))
-				{
+			DWORD dwReceiveThreadID;
+			TerminateThread(hReceiveThread, 0);
+			CloseHandle(hReceiveThread);
+			if(SetupPort(lpszCommName)){
+				if (ConfPort(&MainWindow, lpszCommName)){
 					// Set Read flag true
-					bWantToRead = TRUE;
+					bWantToRead		= TRUE;
+					hReceiveThread	= CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
 					break;
 				}
 			}
 			break;
-			/*GetCommConfig(hComm, &cc, &cc.dwSize);
-			if (!CommConfigDialog (lpszCommName, hwnd, &cc)) 
-				break;*/ 
 		case IDM_ABOUT:
 			DialogBox (hInstance, TEXT ("AboutBox"), hwnd, AboutDlgProc) ;
 			break;
@@ -391,6 +474,7 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 			break;
 	}
 }
+
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: Window_OnDestroy
 --
@@ -447,8 +531,7 @@ BOOL CALLBACK AboutDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_INITDIALOG:
 			return TRUE;
 		case WM_COMMAND:
-			switch (LOWORD (wParam))
-			{
+			switch (LOWORD (wParam)){
 				case ID_OK:{
 					EndDialog (hDlg, 0) ;
 					return TRUE ;
@@ -620,7 +703,6 @@ BOOL FileRead(HWND hwnd, LPCSTR pstrFileName){
     }
 	//DISPLAY TEXT (THIS WILL NEED TO GO IN DISPLAY FUNCTION AFTER READING A FILE
 	DisplayText(hwnd, pszFileText);
-
 	
     return bSuccess;
 }
@@ -650,6 +732,6 @@ void DisplayText(HWND hwnd, LPCSTR text){
 	
 	GetClientRect(hwnd, &drawingArea);
 	hdc = GetDC(hwnd);
-	DrawText(hdc, pszFileText, strlen(pszFileText), &drawingArea, DT_WORDBREAK);
+	DrawText(hdc, pszFileText, -1, &drawingArea, DT_WORDBREAK);
 	ReleaseDC(hwnd, hdc);
 }
