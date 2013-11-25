@@ -95,8 +95,7 @@ CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter, BOOL* isDone)
 BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 {
 //HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/*    //switch (char[1])
-	switch(packet[1])
+	/*switch(packet[1])
 	{
 	case ENQ:
 		//send(ACK);
