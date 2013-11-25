@@ -3,7 +3,7 @@
 --
 --  PROGRAM:        Wireless Protocol (GRVM)
 --
---  FUNCTIONS:      void Transmit(char* lpszFileBuffer)
+--  FUNCTIONS:      void Transmit(LPSTR* lpszFileBuffer)
 --                  bool PacketCheck(char[1024] packet)
 --  
 --
@@ -23,25 +23,30 @@
 -----------------------------------------------------------------------------*/
 
 #include "Transport.h"
-int waitForType = NUL;
-int sentPacketCounter = 0;	/* Counter to keep track of our file location as
+INT waitForType = NUL;
+INT sentPacketCounter = 0;	/* Counter to keep track of our file location as
 							 as well as how many packets we've sent. */
+INT receivedPacketCounter = 0; /* Counter to keep track of how many the other 
+								computer has transmitted */
+BOOL bHaveFileToSend = FALSE;
+
 /*-----------------------------------------------------------------------------
 -	FUNCTION:	Transmit
 -
 -	DATE:		November 21st, 2013
 -
--	REVISIONS:	...
+-	REVISIONS:	
+-	2013/11/25 - Vincent - Semaphore for blocking when hitting maximum packets sent
 -
 -	DESIGNER:	Vincent Lau
 -
 -	PROGRAMMER:	Vincent Lau
 -
--	INTERFACE:	void Transmit (char* file)
+-	INTERFACE:	DWORD WINAPI TransmitThread(LPVOID param)
 -		
 -	RETURNS:	void, nothing.
 -				
--	PARAMETERS:	LPSTR* file - a dynamic char buffer that contains the whole file
+-	PARAMETERS:	LPVOID param - a dynamic char buffer that contains the whole file
 -							we are trying to send over the serial port.
 -
 -	NOTES:	This is the function that contains the logic for transmitting data
@@ -52,15 +57,19 @@ int sentPacketCounter = 0;	/* Counter to keep track of our file location as
 -
 -----------------------------------------------------------------------------*/
 
-void Transmit(LPSTR* file)
+DWORD WINAPI TransmitThread(LPVOID param)
 {
-	char*	packetToSend = "A";
+	LPSTR	packetToSend;
+	LPSTR	file = (LPSTR)param;
 	BOOL	bDoneSending = FALSE;
 	OVERLAPPED osWriter = {0};
-
+	
+	sentPacketCounter = 0;
+	bHaveFileToSend = TRUE;
+	
 	do
 	{
-		//packetToSend = Packetize(file, sentPacketCounter);
+		packetToSend = Packetize(file, sentPacketCounter, &bDoneSending);
 		while (sentPacketCounter % 5 != 0)
 		{
 					
@@ -79,7 +88,10 @@ void Transmit(LPSTR* file)
 			++sentPacketCounter;
 		}
 		// Another semaphore to determine when to start again.
+		WaitForSingleObject(hFileWaitSemaphore, INFINITE);
 	} while(!bDoneSending); //file not done
+
+	ExitThread(EXIT_SUCCESS);
 }
 
 
@@ -88,7 +100,10 @@ void Transmit(LPSTR* file)
 -
 -	DATE:		November 22st, 2013
 -
--	REVISIONS:	2013/11/24 - Vincent - Overlapped i/o 
+-	REVISIONS:	
+-	2013/11/24 - Vincent - Overlapped i/o 
+-	2013/11/25 - Vincent - Semaphore for releasing file sending block, when we've received 5 packets 
+-							(other person hit their maximum)
 -
 -	DESIGNER:	Vincent Lau
 -
@@ -109,7 +124,7 @@ void Transmit(LPSTR* file)
 -----------------------------------------------------------------------------*/
 DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 {
-	char packetBuffer[1024];
+	CHAR packetBuffer[1024];
 	DWORD nBytesRead = 0, dwEvent, dwError, dwWaitValue;
 	OVERLAPPED osReader = {0};
 	COMSTAT cs;
@@ -141,8 +156,19 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				//MessageBox(NULL, TEXT("WFSO success"), NULL, MB_OK); //debug
 				if (ReadSerialPort(hComm, packetBuffer, cs.cbInQue, &nBytesRead, &osReader))
 				{	
-					//
-					//MessageBox(*(HWND*)lphwnd, packetBuffer, NULL, MB_OK);
+					// Successful read, send to packet check
+
+					// send to display - CAN BE DONE IN PACKETCHECK
+					
+					// increment to counter and check - NEEDS TO BE PASSED TO PACKETCHECK
+					if (++receivedPacketCounter % 5 == 0)
+					{
+						if (bHaveFileToSend) // receive thread is going
+							ReleaseSemaphore(hFileWaitSemaphore, 1, NULL); // release semaphore
+					}
+
+					
+					//MessageBox(*(HWND*)lphwnd, packetBuffer, NULL, MB_OK); DEBUG
 				}
 			}
 			else // Event Object was signaled with an error

@@ -6,13 +6,14 @@
 #include "Physical.h"
 
 // Function prototypes
-void Transmit(char*);
+DWORD WINAPI TransmitThread(LPVOID);
 BOOL PacketCheck(HWND, char[1024], int*);
 DWORD WINAPI ReceiveThread	(LPVOID);
 
 // Vars
 
 extern HANDLE hACKWaitSemaphore;
+extern HANDLE hFileWaitSemaphore;
 extern HANDLE hComm;
 extern BOOL bWantToRead;
 #endif

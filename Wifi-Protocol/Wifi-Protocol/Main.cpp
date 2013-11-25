@@ -47,7 +47,9 @@ static HINSTANCE hInstance;
 static OPENFILENAME ofn;
 BOOL bWantToRead			= FALSE;
 HANDLE hACKWaitSemaphore	= INVALID_HANDLE_VALUE;
+HANDLE hFileWaitSemaphore	= INVALID_HANDLE_VALUE;
 HANDLE hReceiveThread		= INVALID_HANDLE_VALUE;
+HANDLE hTransmitThread		= INVALID_HANDLE_VALUE;
 char szFile[260];				// buffer for file name
 HANDLE hf;						// file handle
 HANDLE hComm;
@@ -60,7 +62,7 @@ SCROLLINFO  si ;
 --
 -- DATE: November 12, 2013
 --
--- REVISIONS: 
+-- REVISIONS: 2013/11/25 - Vincent - Added Semaphore creation and error checking
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -99,9 +101,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	// Non-Window related inits
 	hComm = 0;
 	hACKWaitSemaphore	= CreateSemaphore(NULL, 0, 1, NULL);
-	//hReceiveThread		= CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
+	hFileWaitSemaphore	= CreateSemaphore(NULL, 0, 1, NULL);
 
-	if(hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE)
+	if (hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE ||
+		hFileWaitSemaphore == NULL || hFileWaitSemaphore == INVALID_HANDLE_VALUE)
 	{
 		MessageBox(MainWindow, TEXT("Couldn't acquire semaphores"), TEXT("Creation error"), MB_OK);
 		return EXIT_FAILURE;
@@ -413,6 +416,7 @@ BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 -- November 13, 2013 - Mat Siwoski: Completed implementation of the SendFile
 -- November 13, 2013 - Mat Siwoski: Implementation of the Config option.
 -- November 18, 2013 - Robin Hsieh: Added the enabling and disabling menu items.
+-- November 25, 2013 - Vincent Lau: Added creation of the Transmit thread after successful file read operation
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -439,13 +443,23 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 				DrawMenuBar(hwnd);
 			break;
 		case IDM_SENDFILE:
+			DWORD dwTransmitThreadID;
 			if (FileOpenDlg(hwnd, szFileName, szTitleName)){
-				if (!FileRead(hwnd, szFileName)){
+				if (!FileRead(hwnd, szFileName)){ // error file could not be read
                          OkMessage (hwnd, TEXT ("Could not read file %s!"),
                                     szTitleName) ;
                          szFileName[0]  = '\0' ;
                          szTitleName[0] = '\0' ;
-                    }
+                }
+				else // success file read
+				{
+					// Clean up thread
+					TerminateThread(hTransmitThread, 0);
+					CloseHandle(hTransmitThread);
+					ReleaseSemaphore(hFileWaitSemaphore, 1, NULL);
+					// create transmit thread for this file
+					hTransmitThread = CreateThread(NULL, 0, TransmitThread, pszFileText, 0, &dwTransmitThreadID);
+				}
 			}
 			break;
 		case IDM_DISCONNECT:
