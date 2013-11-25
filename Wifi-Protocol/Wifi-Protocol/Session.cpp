@@ -29,7 +29,7 @@
 -
 -	DATE:		September 20th, 2013
 -
--	REVISIONS:	...
+-	REVISIONS:	2013/11/24 - Vincent - Trying to do Overlapped I/O... imminent regret
 -
 -	DESIGNER:	Vincent Lau
 -
@@ -54,7 +54,7 @@ BOOL SetupPort (LPTSTR lpszPortName)
 {
     CloseHandle(hComm); // Ensures that the port can be opened more than once
 	if ((hComm = CreateFile (lpszPortName, GENERIC_READ | GENERIC_WRITE, 0,
-		NULL, OPEN_EXISTING, NULL, NULL)) == INVALID_HANDLE_VALUE)
+		NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL)) == INVALID_HANDLE_VALUE)
 	{
 		// Failed to find COM port
 		MessageBox (NULL, TEXT("Error opening COM Port"), lpszPortName, MB_OK);
@@ -107,7 +107,7 @@ BOOL ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 		MessageBox (*lphwnd,TEXT("Couldn't set comm state"),TEXT(""), MB_OK);
 		return false;
 	}*/
-	
+	/*
 	if(!GetCommTimeouts(hComm, &comTimeout))
 	{
 		MessageBox (*lphwnd,TEXT("Couldn't get timeouts"),TEXT(""), MB_OK);
@@ -125,7 +125,7 @@ BOOL ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 	{
 		MessageBox (*lphwnd,TEXT("Couldn't set timeouts"),TEXT(""), MB_OK);
 		return FALSE;
-	}
+	}*/
 
 	PurgeComm(hComm, PURGE_RXCLEAR | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_TXABORT);
 

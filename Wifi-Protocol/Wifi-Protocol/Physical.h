@@ -5,8 +5,8 @@
 #include "Packet.h"
 
 // Function Prototypes
-BOOL ReadSerialPort(HANDLE, char[1024], DWORD cbInQue, LPDWORD);
-BOOL SendControl(HANDLE, int);
-BOOL SendData (HANDLE, char [1024]);
+BOOL ReadSerialPort(HANDLE hComm, char packetBuffer[1024], DWORD dwBytesToRead, LPDWORD lpdwBytesRead, LPOVERLAPPED lpOV);
+BOOL SendControl(HANDLE, int, LPOVERLAPPED);
+BOOL SendData (HANDLE, char [1024], LPOVERLAPPED);
 
 #endif
