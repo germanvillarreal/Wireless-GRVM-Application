@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------------------------------------------
 -- SOURCE FILE: Main.cpp
 --
--- PROGRAM: Wireless-MRGV
+-- PROGRAM: Wireless-GRVM
 --
 -- FUNCTIONS:
 -- int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam, int nCmdShow)
@@ -199,7 +199,7 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 --
 -- REVISIONS: 
 -- November 23, 2013 - Mat Siwoski: Added Window_OnVScroll
--- November 24, 2013 - Mat Siwoski: Added Window_OnPaint
+-- November 24, 2013 - Mat Siwoski: Added Window_OnPaint, Window_OnSize
 --
 -- DESIGNER: Mat Siwoski
 --
