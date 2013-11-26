@@ -70,7 +70,8 @@ DWORD WINAPI TransmitThread(LPVOID param)
 		packetToSend = Packetize(file, sentPacketCounter, &bDoneSending);
 		while (++sentPacketCounter % 6 != 0) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 		{
-					
+			// semaphore decrement 
+			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
 			while(1) // Send packet to serial port
 			{	
 				if(SendData(hComm, packetToSend))
@@ -79,8 +80,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			// Set "What we're waiting for" to ACK
 			waitForType = ACK;
 
-			// semaphore decrement (minus 1, should try to equal -1 and block)
-			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
+			
 
 		}
 		// Another semaphore to determine when to start again.

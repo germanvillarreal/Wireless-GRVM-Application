@@ -101,7 +101,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	
 	// Non-Window related inits
 	hComm = 0;
-	hACKWaitSemaphore	= CreateSemaphore(NULL, 0, 1, NULL);
+	hACKWaitSemaphore	= CreateSemaphore(NULL, 1, 1, NULL);
 	hFileWaitSemaphore	= CreateSemaphore(NULL, 0, 1, NULL);
 
 	if (hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE ||
