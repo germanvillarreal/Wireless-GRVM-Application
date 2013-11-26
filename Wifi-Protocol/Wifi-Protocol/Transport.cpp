@@ -26,8 +26,6 @@
 INT waitForType = NUL;
 INT sentPacketCounter = 0;	/* Counter to keep track of our file location as
 							 as well as how many packets we've sent. */
-INT receivedPacketCounter = 0; /* Counter to keep track of how many the other 
-								computer has transmitted */
 BOOL bHaveFileToSend = FALSE;
 LPSTR	packetToSend;		/* Global packet buffer */
 
@@ -70,7 +68,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 	do
 	{
 		packetToSend = Packetize(file, sentPacketCounter, &bDoneSending);
-		while (sentPacketCounter % 5 != 0)
+		while (++sentPacketCounter % 6 != 0) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 		{
 					
 			while(1) // Send packet to serial port
@@ -84,8 +82,6 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			// semaphore decrement (minus 1, should try to equal -1 and block)
 			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
 
-			// Increment sent counter
-			++sentPacketCounter;
 		}
 		// Another semaphore to determine when to start again.
 		WaitForSingleObject(hFileWaitSemaphore, INFINITE);
@@ -124,7 +120,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 -----------------------------------------------------------------------------*/
 DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 {
-	CHAR packetBuffer[1024];
+	CHAR packetBuffer[1024] = {};
 	DWORD nBytesRead = 0, dwEvent, dwError, dwWaitValue;
 	COMSTAT cs;
 
@@ -156,14 +152,6 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				if (ReadSerialPort(hComm, packetBuffer, cs.cbInQue, &nBytesRead))
 				{	
 					// Successful read, send to packet check
-
-					// increment to counter and check - NEEDS TO BE PASSED TO PACKETCHECK
-					if (++receivedPacketCounter % 5 == 0)
-					{
-						if (bHaveFileToSend) // receive thread is going
-							ReleaseSemaphore(hFileWaitSemaphore, 1, NULL); // release semaphore
-					}
-
 					
 					//MessageBox(*(HWND*)lphwnd, packetBuffer, NULL, MB_OK); DEBUG
 				}

@@ -94,10 +94,20 @@ CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter, BOOL* isDone)
 
 BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 {
+	// Make sure we're getting our own packets, not some other packet
+	switch (packet[0])
+	{
+	case SYN:
+		break;
+	default:
+		return FALSE;
+	}
+
 //HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	/*switch(packet[1])
+	/*switch (packet[1])
 	{
 	case ENQ:
+		// make 
 		//send(ACK);
 
 		//Set "what we're waiting for" flag to PACKET_DC1
