@@ -1,5 +1,6 @@
 #define IDM_MENU1                   101
 #define IDI_MYICON					102
+#define IDI_CONFIG_ICON				103
 
 #define IDM_CONNECT					40000
 #define IDM_SENDFILE				40001

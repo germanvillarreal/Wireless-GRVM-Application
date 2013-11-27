@@ -267,12 +267,15 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 -- This function that handles the dimensions for the window size.
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
-	RECT drawingArea;
+	//RECT drawingArea;
 	HWND hStatus;
     RECT rcStatus;
     int iStatusHeight;
 	int iEditHeight;
-			RECT rcClient;
+	RECT rcClient;
+	HWND hTool;
+	RECT rcTool;
+	int iToolHeight;
 	/*GetClientRect(hwnd, &drawingArea);
 
 	si.cbSize = sizeof(si);
@@ -284,6 +287,11 @@ void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
 	si.nPos = 0;
 	
 	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);*/
+	hTool = GetDlgItem(hwnd, IDC_MAIN_TOOL);
+	SendMessage(hTool, TB_AUTOSIZE, 0, 0);
+
+	GetWindowRect(hTool, &rcTool);
+	iToolHeight = rcTool.bottom - rcTool.top;
 
 	hStatus = GetDlgItem(hwnd, IDC_MAIN_STATUS);
     SendMessage(hStatus, WM_SIZE, 0, 0);
@@ -291,10 +299,10 @@ void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
     GetWindowRect(hStatus, &rcStatus);
     iStatusHeight = rcStatus.bottom - rcStatus.top;
 	GetClientRect(hwnd, &rcClient);
-	iEditHeight = rcClient.bottom  - iStatusHeight;
+	iEditHeight = rcClient.bottom - iToolHeight - iStatusHeight;
 
-			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
-			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, iEditHeight, SWP_NOZORDER);
+	hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+	SetWindowPos(hEdit, NULL, 0, iToolHeight, rcClient.right, iEditHeight, SWP_NOZORDER);
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -429,12 +437,37 @@ void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
 BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 	HWND hStatus, hTool;
 	int statwidths[] = {100, -1};
+	TBBUTTON tbb[3];
+	TBADDBITMAP tbab;
 
 	hTool = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_VISIBLE, 0, 0, 0, 0,
 				hwnd, (HMENU)IDC_MAIN_TOOL, GetModuleHandle(NULL), NULL);
 	if(hTool == NULL){
 		MessageBox(hwnd, "Could not create tool bar.", "Error", MB_OK | MB_ICONERROR);
 	} 
+	SendMessage(hTool, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+	tbab.hInst = HINST_COMMCTRL;
+	tbab.nID = IDB_STD_SMALL_COLOR;
+	SendMessage(hTool, TB_ADDBITMAP, 0, (LPARAM)&tbab);
+
+	ZeroMemory(tbb, sizeof(tbb));
+	tbb[0].iBitmap = IDI_CONFIG_ICON;
+	tbb[0].fsState = TBSTATE_ENABLED;
+	tbb[0].fsStyle = TBSTYLE_BUTTON;
+	tbb[0].idCommand = IDM_CONFIG;
+
+	tbb[1].iBitmap = STD_FILEOPEN;
+	tbb[1].fsState = TBSTATE_ENABLED;
+	tbb[1].fsStyle = TBSTYLE_BUTTON;
+	tbb[1].idCommand = IDM_SENDFILE;
+
+	tbb[2].iBitmap = STD_FILESAVE;
+	tbb[2].fsState = TBSTATE_ENABLED;
+	tbb[2].fsStyle = TBSTYLE_BUTTON;
+	tbb[2].idCommand = IDM_SAVEFILE;
+
+	SendMessage(hTool, TB_ADDBUTTONS, sizeof(tbb)/sizeof(TBBUTTON), (LPARAM)&tbb);
+	
 	hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "", 
 				WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL, 
 				0, 0, 100, 100, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);

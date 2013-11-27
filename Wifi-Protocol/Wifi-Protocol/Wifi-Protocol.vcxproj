@@ -32,6 +32,7 @@
     <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="config.ico" />
     <Image Include="icon.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
