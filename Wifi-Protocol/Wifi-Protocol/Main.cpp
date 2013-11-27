@@ -462,6 +462,10 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
                 }
 				else // success file read
 				{
+					/*
+					Testing of the ErrorCheck function by passing in the data
+					*/
+					BOOL errchk = ErrorCheck((char*)pszFileText);
 					// Clean up thread
 					TerminateThread(hTransmitThread, 0);
 					CloseHandle(hTransmitThread);

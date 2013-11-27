@@ -23,7 +23,7 @@ void OpenFileInitialize(HWND);
 BOOL FileOpenDlg (HWND, PTSTR, LPCSTR);
 BOOL FileRead(HWND, const LPCSTR);
 void OkMessage(HWND, TCHAR*, TCHAR*);
-BOOL ErrorCheck(char);
+BOOL ErrorCheck(char*);
 void DisplayText(HWND, LPCSTR);
 void Window_OnVScroll(HWND, HWND, UINT, int);
 void Window_OnPaint(HWND);

@@ -25,7 +25,7 @@
 #include "resource.h"
 #include "Main.h"
 
-# define TEST_SIZE 1020
+#define TEST_SIZE 1020
 
 static unsigned short crc_table [256] = {
 
@@ -128,16 +128,9 @@ unsigned short CRCCCITT(unsigned char *data, size_t length, unsigned short seed,
 -- This function is the entry point for a graphical Windows-based application.
 ------------------------------------------------------------------------------------------------------------------*/
 BOOL ErrorCheck(char pkt[1020]){
-	HWND MainWindow;
 	unsigned short the_crc;
 	unsigned char buff [TEST_SIZE + 2];
-
-	if (sizeof(pkt) != TEST_SIZE)
-	{
-		MessageBox(MainWindow, TEXT("ErrorCheck Error: crcccitt"), TEXT("packet size is not 1020"), MB_OK);
-		//return EXIT_FAILURE;
-		return false;
-	}
+	BOOL successful = false;
 
 	the_crc = CRCCCITT(buff, TEST_SIZE, 0xffff, 0);
 	printf("Initial CRC value is 0x%04X\n", the_crc);
@@ -148,8 +141,14 @@ BOOL ErrorCheck(char pkt[1020]){
 	the_crc = CRCCCITT(buff, TEST_SIZE + 2, 0xffff, 0);
 	printf("Final CRC value is 0x%04X\n", the_crc);
 
+	if(the_crc == 0)
+	{
+		successful = true;
+	}
+
+
 	//return EXIT_SUCCESS;
-	return true;
+	return successful;
 
 
 	/*
