@@ -27,6 +27,9 @@ INT waitForType = ENQ;
 INT sentPacketCounter = 0;	/* Counter to keep track of our file location as
 							 as well as how many packets we've sent. */
 BOOL bHaveFileToSend = FALSE;
+BOOL bENQToSend	= FALSE;
+BOOL bENQReceived = FALSE;
+BOOL bWantLine = FALSE;
 LPSTR	packetToSend;		/* Global packet buffer */
 
 /*-----------------------------------------------------------------------------
@@ -36,10 +39,16 @@ LPSTR	packetToSend;		/* Global packet buffer */
 -
 -	REVISIONS:	
 -	2013/11/25 - Vincent - Semaphore for blocking when hitting maximum packets sent
+-	2013/11/26 - Vincent - Added line bidding
+-   2013/11/27 - Vincent/German - Modified line bidding solve issues with simultaneous file sending
+-								- Modified Packetize/sentPacketCounter call order
+-								- Added basic timeout for end of 5 packet transmission
+-								- Added line rebidding
 -
 -	DESIGNER:	Vincent Lau
 -
 -	PROGRAMMER:	Vincent Lau
+-				German Villarreal
 -
 -	INTERFACE:	DWORD WINAPI TransmitThread(LPVOID param)
 -		
@@ -68,30 +77,41 @@ DWORD WINAPI TransmitThread(LPVOID param)
 	do
 	{
 		// Send ENQ - for getting the right-of-way to send
-		//if () // check if we're already receiving some data
-		SendControl(hComm, ENQ);
+		bENQToSend = TRUE;
+		if (bENQReceived) // if The other guy is sending something
+		{
+			WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
+		}
+		
+		SendControl(hComm, ENQ);// REQUEST DA LINE
 
 		// Wait for ACK
 		waitForType = ACK;
-		WaitForSingleObject(hACKWaitSemaphore, INFINITE);
-
-		packetToSend = Packetize(file, sentPacketCounter, &bDoneSending);
+		bWantLine = TRUE;
+		WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
+		bWantLine = FALSE;
+		
 		while (++sentPacketCounter % 6 != 0) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 		{
 			// semaphore decrement 
 			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
-			while(1) // Send packet to serial port
-			{	
-				if(SendData(hComm, packetToSend))
-					break;
-			}
+
+			packetToSend = Packetize(file, (sentPacketCounter - 1), &bDoneSending);
+				
+			SendData(hComm, packetToSend); // Send data to Serial Port
+				
 			// Set "What we're waiting for" to ACK
 			waitForType = ACK;
 
 		}
+		SendControl(hComm, EOT);
 		// Another semaphore to determine when to start again.
-		WaitForSingleObject(hFileWaitSemaphore, INFINITE);
+		Sleep(200);
+		//WaitForSingleObject(hFileWaitSemaphore, INFINITE);
 	} while(!bDoneSending); //file not done
+
+	// DONE SENDING
+	bENQToSend = FALSE;
 
 	ExitThread(EXIT_SUCCESS);
 }

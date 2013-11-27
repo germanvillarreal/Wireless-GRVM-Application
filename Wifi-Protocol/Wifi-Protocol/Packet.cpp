@@ -92,35 +92,44 @@ CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter, BOOL* isDone)
 }
 
 
-BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
+BOOL PacketCheck(HWND hwnd, char packet[1024])
 {
 	// Make sure we're getting our own packets, not some other packet
 	switch (packet[0])
 	{
 	case SYN:
 		break;
-	default:
+	default: // discard packet
 		return FALSE;
 	}
 
 //HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	/*switch (packet[1])
+	switch (packet[1])
 	{
 	case ENQ:
-		// make 
-		//send(ACK);
-
-		//Set "what we're waiting for" flag to PACKET_DC1
-		*waitForType = DC1;
-	return TRUE;
+		bENQReceived = TRUE;
+		SendControl(hComm, ACK);
+		//Set "what we're waiting for" flag to DC1
+		waitForType = DC1;
+	break;
 	case ACK:
-		ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
-	return TRUE;
+		// check if we wanted an ACK
+		if (waitForType == ACK)
+		{
+			// check if we're actually bidding for the line
+			if (bWantLine)
+				ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
+			else
+			// check if we're sending a file
+				ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
+		}
+	break;
+	/*
 	case DC1:
 		//if we're waiting for a DC2 packet
-		if(*waitForType == DC2)
+		if(waitForType == DC2)
 		{
-			//send (NAK);
+			SendControl(hComm, NAK);
 			break;
 		}
 
@@ -132,7 +141,7 @@ BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 	
 		send (ACK);
 		Display(hwnd);//read the remaining 1020 characters 
-	return TRUE;
+	break;
 	
 			
 	case DC2:
@@ -149,19 +158,24 @@ BOOL PacketCheck(HWND hwnd, char packet[1024], int *waitForType)
 		}
 		send (ACK);
 		Display();//read the remaining 1020 characters 
-	return TRUE;
+	break;; */
 		
 	case NAK:
-
 		//Set "What we're waiting for" flag to ACK
-		*waitForType = ACK;
-		send (previous packet); //need a way to keep that
+		waitForType = ACK;
+		SendData(hComm, packetToSend); // send the previous packet
 	break;
 		
 	case EOT:
+		bENQReceived = FALSE;
+		if (bENQToSend)
+		{
+			ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
+			break;
+		}
 		// GO back to IDLE state
-		*waitForType = ENQ;
+		waitForType = ENQ;
 	break;
-    }*/
+    }
 	return TRUE;
 }
