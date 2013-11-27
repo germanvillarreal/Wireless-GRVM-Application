@@ -5,8 +5,9 @@
 --
 -- FUNCTIONS:
 -- unsigned short CRCCCITT(unsigned char *data, size_t length, unsigned short seed, unsigned short final)
--- BOOL ErrorCheck(char pkt[1020])
---
+-- BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE])
+-- char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE])
+-- 
 -- DATE: November 18, 2013
 --
 -- REVISIONS:  
@@ -27,6 +28,7 @@
 
 #define GENERATE_CRC_TEST_SIZE	1020
 #define ERROR_CHECK_TEST_SIZE	1022
+
 
 static unsigned short crc_table [256] = {
 
@@ -87,10 +89,10 @@ static unsigned short crc_table [256] = {
 -- PROGRAMMER: Robin Hsieh
 --
 -- INTERFACE: unsigned short CRCCCITT(unsigned char *data, size_t length, unsigned short seed, unsigned short final)
---				unsigned char *data: The data that needs to be generated
---				size_t length: The length of the generation.
---				unsigned short seed: The seed that is referenced within the crc table.
---				unsigned short final: Bitwise exclusive or with the CRC generated from the table.
+--				unsigned char *data:		The data that needs to be generated
+--				size_t length:				The length of the generation.
+--				unsigned short seed:		The seed that is referenced within the crc table.
+--				unsigned short final:		Bitwise exclusive or with the CRC generated from the table.
 --
 -- RETURNS: Returns the generated CRC code.
 --
@@ -121,7 +123,9 @@ unsigned short CRCCCITT(char *data, size_t length, unsigned short seed, unsigned
 -- PROGRAMMER: Robin Hsieh
 --
 -- INTERFACE: BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE])
---				char pkt[1020]: packet of data that needs to be error checked using the CRC16 algorithm
+--				char pkt[1020]:					Packet of data that needs to be error checked using the CRC16 algorithm
+--				unsigned short the_crc:			Remainder for the crc
+--				unsigned short checking_crc:	Used to check the crc
 --
 -- RETURNS: Returns the true if error check passes.
 --
@@ -130,11 +134,8 @@ unsigned short CRCCCITT(char *data, size_t length, unsigned short seed, unsigned
 ------------------------------------------------------------------------------------------------------------------*/
 BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE]){ // ERROR_CHECK_TEST_SIZE = 1022
 
-	// ErrorCheck(packet[1020], packet[1021]);
 	unsigned short the_crc, checking_crc;
 	unsigned short first_crc, second_crc;
-	BOOL successful = true;
-	BOOL failure = false;
 
 	first_crc = pkt [ERROR_CHECK_TEST_SIZE - 2];
 	second_crc = pkt [ERROR_CHECK_TEST_SIZE - 1];
@@ -147,10 +148,10 @@ BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE]){ // ERROR_CHECK_TEST_SIZE = 102
 	// If the remainder of "the_crc" should be 0 if everything is correct.
 	if(the_crc == 0)
 	{
-		return successful;
+		return true;
 	}
 
-	return failure;
+	return false;
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -165,7 +166,9 @@ BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE]){ // ERROR_CHECK_TEST_SIZE = 102
 -- PROGRAMMER: Robin Hsieh
 --
 -- INTERFACE: char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE])
---				char pkt[1020]: packet of data that needs to be error checked using the CRC16 algorithm
+--				char pkt[1020]:				Packet of data that needs to be error checked using the CRC16 algorithm.
+--				unsigned short the_crc:		Remainder for the crc.
+--				char generatedCRC[2]:		The two crc bytes generated.
 --
 -- RETURNS: Returns the 2 CRC characters.
 --
