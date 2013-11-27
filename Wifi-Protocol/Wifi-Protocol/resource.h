@@ -13,3 +13,4 @@
 #define IDC_STATIC					40020
 #define IDC_MAIN_STATUS				40021
 #define IDC_MAIN_TOOL				40022
+#define IDC_MAIN_EDIT				40023

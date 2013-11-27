@@ -60,6 +60,7 @@ HANDLE hComm;
 COMMCONFIG cc;
 LPSTR pszFileText;
 SCROLLINFO  si ;
+HWND hEdit;
 
 /*------------------------------------------------------------------------------------------------------------------
 -- FUNCTION: WinMain
@@ -190,7 +191,7 @@ HWND Create(HINSTANCE hInst, int nCmdShow)
 {
 	//hInstance = hInst;
 
-	HWND hwnd = CreateWindow (szAppName, szAppName, WS_OVERLAPPEDWINDOW |  WS_VSCROLL,
+	HWND hwnd = CreateWindowEx( 0, szAppName, szAppName, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, NULL, hInst, NULL);
 
 	if (hwnd == NULL)
@@ -232,7 +233,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	switch (Message){
 		HANDLE_MSG(hwnd, WM_CREATE, Window_OnCreate);
 		HANDLE_MSG(hwnd, WM_COMMAND, Window_OnCommand);
-		HANDLE_MSG(hwnd, WM_VSCROLL, Window_OnVScroll);
+		//HANDLE_MSG(hwnd, WM_VSCROLL, Window_OnVScroll);
 		HANDLE_MSG(hwnd, WM_SIZE, Window_OnSize);
 		HANDLE_MSG(hwnd, WM_PAINT, Window_OnPaint);
 		HANDLE_MSG(hwnd, WM_DESTROY, Window_OnDestroy);
@@ -267,40 +268,33 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
 	RECT drawingArea;
-	HWND hStatus, hTool;
-    RECT rcStatus, rcTool;
-    int iStatusHeight, iToolHeight;
-	HWND hEdit;
-    int iEditHeight;
-    RECT rcClient;
-	
-	GetClientRect(hwnd, &drawingArea);
+	HWND hStatus;
+    RECT rcStatus;
+    int iStatusHeight;
+	int iEditHeight;
+			RECT rcClient;
+	/*GetClientRect(hwnd, &drawingArea);
 
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_ALL;
 	si.nMin = 0;
-	//********************************************THIS IS MY ISSUE******************************************************//
-	si.nMax = cy*12;
+	//********************************************THIS IS MY ISSUE******************************************************
+	/*si.nMax = cy*12;
 	si.nPage = 30;
 	si.nPos = 0;
 	
-	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);*/
 
 	hStatus = GetDlgItem(hwnd, IDC_MAIN_STATUS);
     SendMessage(hStatus, WM_SIZE, 0, 0);
 
-	hTool = GetDlgItem(hwnd, IDC_MAIN_TOOL);
-    SendMessage(hTool, TB_AUTOSIZE, 0, 0);
-
-    GetWindowRect(hTool, &rcTool);
-    iToolHeight = rcTool.bottom - rcTool.top;
-
     GetWindowRect(hStatus, &rcStatus);
     iStatusHeight = rcStatus.bottom - rcStatus.top;
+	GetClientRect(hwnd, &rcClient);
+	iEditHeight = rcClient.bottom  - iStatusHeight;
 
-	
-
-  
+			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, iEditHeight, SWP_NOZORDER);
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -323,7 +317,7 @@ void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
 -- This function repaints the window (specifically when scrollbar is pressed)
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnPaint(HWND hwnd){
-	PAINTSTRUCT ps;
+	/*PAINTSTRUCT ps;
 	int iVertPos, iHorzPos;
 	RECT drawingArea;
 	HDC hdc = BeginPaint (hwnd, &ps) ;
@@ -340,7 +334,7 @@ void Window_OnPaint(HWND hwnd){
 		DrawText (hdc, pszFileText, -1, &drawingArea, DT_EXPANDTABS | DT_WORDBREAK) ;
 	}
 	UpdateWindow(hwnd);
-	EndPaint(hwnd, &ps);
+	EndPaint(hwnd, &ps);*/
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -366,7 +360,7 @@ void Window_OnPaint(HWND hwnd){
 -- This function handles the Scrolling for the window.
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
-	int iVertPos;
+	/*int iVertPos;
 	si.cbSize = sizeof (si) ;
 	si.fMask  = SIF_ALL ;
 	GetScrollInfo (hwnd, SB_VERT, &si) ;
@@ -410,7 +404,7 @@ void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
                             NULL, NULL) ;
 		//InvalidateRect(hwnd, &drawingArea, TRUE);
         UpdateWindow (hwnd) ;
-    }
+    }*/
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -435,22 +429,27 @@ void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
 BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 	HWND hStatus, hTool;
 	int statwidths[] = {100, -1};
+
+	hTool = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_VISIBLE, 0, 0, 0, 0,
+				hwnd, (HMENU)IDC_MAIN_TOOL, GetModuleHandle(NULL), NULL);
+	if(hTool == NULL){
+		MessageBox(hwnd, "Could not create tool bar.", "Error", MB_OK | MB_ICONERROR);
+	} 
+	hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "", 
+				WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL, 
+				0, 0, 100, 100, hwnd, (HMENU)IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+	if(hEdit == NULL){
+		MessageBox(hwnd, "Could not create edit box.", "Error", MB_OK | MB_ICONERROR);
+	}
+	//SendMessage(hTool, TB_ADDBUTTONS, sizeof(tbb)/sizeof(TBBUTTON), (LPARAM)&tbb);
+	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0, hwnd, (HMENU)IDC_MAIN_STATUS, GetModuleHandle(NULL), NULL);
  
-	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0,
-				 hwnd, (HMENU)IDC_MAIN_STATUS, GetModuleHandle(NULL), NULL);
+	SendMessage(hStatus, SB_SETPARTS, sizeof(statwidths)/sizeof(int), (LPARAM)statwidths);
+	SendMessage(hStatus, SB_SETTEXT, 0, (LPARAM)"Test");
+ 
 	if(hStatus == NULL){
 		MessageBox(hwnd, "Could not create StatusBar.", "Error", MB_OK | MB_ICONERROR);
 	}
-	hTool = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_VISIBLE, 0, 0, 0, 0,
-        hwnd, (HMENU)IDC_MAIN_TOOL, GetModuleHandle(NULL), NULL);
-	if(hTool == NULL){
-				MessageBox(hwnd, "Could not create tool bar.", "Error", MB_OK | MB_ICONERROR);
-	}
- 
-	SendMessage(hStatus, SB_SETPARTS, sizeof(statwidths)/sizeof(int), (LPARAM)statwidths);
-	SendMessage(hStatus, SB_SETTEXT, 0, (LPARAM)"Status");
-	
-	
 	OpenFileInitialize(hwnd);
 	return TRUE;
 }
@@ -771,6 +770,7 @@ BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
 					pszFileText[dwFileSize] = '\0' ;
 					pszFileText[dwFileSize + 1] = '\0' ;
 					bSuccess = TRUE;
+					
                 }
                //free(pszFileText); //not sure if this is needed here or not as i think this frees the memory (i.e. the stuff we read)
             }
@@ -778,7 +778,7 @@ BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
        CloseHandle(hFile);
     }
 	//DISPLAY TEXT (THIS WILL NEED TO GO IN DISPLAY FUNCTION AFTER READING A FILE
-	DisplayText(hwnd, pszFileText);
+	DisplayText(hEdit, pszFileText);
 	
     return bSuccess;
 }
@@ -803,14 +803,16 @@ BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
 -- NOTES:
 -- This function displays the formatted text.
 ------------------------------------------------------------------------------------------------------------------*/
-void DisplayText(HWND hwnd, LPCSTR text){
-	HDC hdc;
+void DisplayText(HWND hEdit, LPCSTR text){
+
+	SetWindowText(hEdit, text);
+	/*HDC hdc;
 	RECT drawingArea;
 	
 	GetClientRect(hwnd, &drawingArea);
 	hdc = GetDC(hwnd);
 	DrawText(hdc, pszFileText, -1, &drawingArea, DT_WORDBREAK);
-	ReleaseDC(hwnd, hdc);
+	ReleaseDC(hwnd, hdc);*/
 }
 
 /*------------------------------------------------------------------------------------------------------------------
