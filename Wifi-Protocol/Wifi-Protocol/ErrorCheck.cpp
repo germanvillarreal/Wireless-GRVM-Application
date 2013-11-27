@@ -25,7 +25,8 @@
 #include "resource.h"
 #include "Main.h"
 
-#define TEST_SIZE 1020
+#define GENERATE_CRC_TEST_SIZE	1020
+#define ERROR_CHECK_TEST_SIZE	1022
 
 static unsigned short crc_table [256] = {
 
@@ -96,7 +97,7 @@ static unsigned short crc_table [256] = {
 -- NOTES:
 -- This function creates the generated CRC code. Taken from http://automationwiki.com/index.php?title=CRC-16-CCITT
 ------------------------------------------------------------------------------------------------------------------*/
-unsigned short CRCCCITT(unsigned char *data, size_t length, unsigned short seed, unsigned short final)
+unsigned short CRCCCITT(char *data, size_t length, unsigned short seed, unsigned short final)
 { 
 	size_t count;
 	unsigned int crc = seed;
@@ -119,33 +120,78 @@ unsigned short CRCCCITT(unsigned char *data, size_t length, unsigned short seed,
 --
 -- PROGRAMMER: Robin Hsieh
 --
--- INTERFACE: BOOL ErrorCheck(char pkt[1020])
+-- INTERFACE: BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE])
 --				char pkt[1020]: packet of data that needs to be error checked using the CRC16 algorithm
 --
 -- RETURNS: Returns the true if error check passes.
 --
 -- NOTES:
--- This function is the entry point for a graphical Windows-based application.
+-- This function does the error checking on the packets received.
 ------------------------------------------------------------------------------------------------------------------*/
-BOOL ErrorCheck(char pkt[1020]){
-	unsigned short the_crc;
-	unsigned char buff [TEST_SIZE + 2];
-	BOOL successful = false;
+BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE]){ // ERROR_CHECK_TEST_SIZE = 1022
 
-	the_crc = CRCCCITT(buff, TEST_SIZE, 0xffff, 0);
-	printf("Initial CRC value is 0x%04X\n", the_crc);
+	// ErrorCheck(packet[1020], packet[1021]);
+	unsigned short the_crc, checking_crc;
+	unsigned short first_crc, second_crc;
+	BOOL successful = true;
+	BOOL failure = false;
 
-	buff [TEST_SIZE] = (unsigned char)((the_crc >> 8) & 0xff);
-	buff [TEST_SIZE + 1] = (unsigned char)(the_crc & 0xff);
+	first_crc = pkt [ERROR_CHECK_TEST_SIZE - 2];
+	second_crc = pkt [ERROR_CHECK_TEST_SIZE - 1];
 
-	the_crc = CRCCCITT(buff, TEST_SIZE + 2, 0xffff, 0);
+	checking_crc = (unsigned char)((first_crc << 8) + second_crc);
+
+	the_crc = CRCCCITT(pkt, ERROR_CHECK_TEST_SIZE - 2, 0xffff, checking_crc);
 	printf("Final CRC value is 0x%04X\n", the_crc);
-
+	
 	// If the remainder of "the_crc" should be 0 if everything is correct.
 	if(the_crc == 0)
 	{
-		successful = true;
+		return successful;
 	}
 
-	return successful;
+	return failure;
+}
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: GenerateCRC
+--
+-- DATE: November 27, 2013
+--
+-- REVISIONS: 
+--
+-- DESIGNER: Robin Hsieh
+--
+-- PROGRAMMER: Robin Hsieh
+--
+-- INTERFACE: char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE])
+--				char pkt[1020]: packet of data that needs to be error checked using the CRC16 algorithm
+--
+-- RETURNS: Returns the true if error check passes.
+--
+-- NOTES:
+-- This function does the error checking on the packets received.
+------------------------------------------------------------------------------------------------------------------*/
+char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE]){ // GENERATE_CRC_TEST_SIZE = 1020
+	unsigned short the_crc;
+	char buff [GENERATE_CRC_TEST_SIZE + 2];
+
+	char generatedCRC[2];
+
+	for(size_t i = 0; i < GENERATE_CRC_TEST_SIZE; i++)
+	{
+		buff[i] = pkt[i];
+	}
+
+	the_crc = CRCCCITT(buff, GENERATE_CRC_TEST_SIZE, 0xffff, 0);
+	printf("Initial CRC value is 0x%04X\n", the_crc);
+
+	buff [GENERATE_CRC_TEST_SIZE] = (unsigned char)((the_crc >> 8) & 0xff);
+	buff [GENERATE_CRC_TEST_SIZE + 1] = (unsigned char)(the_crc & 0xff);
+	
+	generatedCRC[0] = buff [GENERATE_CRC_TEST_SIZE];
+	generatedCRC[1] = buff [GENERATE_CRC_TEST_SIZE + 1];
+
+	return generatedCRC;
+
 }
