@@ -11,7 +11,7 @@ BOOL PacketCheck(HWND, char[1024], int*);
 DWORD WINAPI ReceiveThread	(LPVOID);
 
 // Vars
-
+extern HANDLE hWaitForLineSemaphore;
 extern HANDLE hACKWaitSemaphore;
 extern HANDLE hFileWaitSemaphore;
 extern HANDLE hComm;

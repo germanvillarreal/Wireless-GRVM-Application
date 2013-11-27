@@ -18,6 +18,9 @@ CHAR* Packetize(CHAR*, int, BOOL*);
 BOOL PacketCheck(HWND, char[1024], int*);
 
 // vars
+extern HANDLE hWaitForLineSemaphore;
 extern HANDLE hACKWaitSemaphore;
+extern HANDLE hFileWaitSemaphore;
+extern INT waitForType;
 
 #endif

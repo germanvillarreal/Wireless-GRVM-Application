@@ -45,11 +45,12 @@ static HWND MainWindow;
 static char szAppName[]		= "Windows Protocol";
 static HINSTANCE hInstance;
 static OPENFILENAME ofn;
-BOOL bWantToRead			= FALSE;
-HANDLE hACKWaitSemaphore	= INVALID_HANDLE_VALUE;
-HANDLE hFileWaitSemaphore	= INVALID_HANDLE_VALUE;
-HANDLE hReceiveThread		= INVALID_HANDLE_VALUE;
-HANDLE hTransmitThread		= INVALID_HANDLE_VALUE;
+BOOL bWantToRead			 = FALSE;
+HANDLE hWaitForLineSemaphore = INVALID_HANDLE_VALUE;
+HANDLE hACKWaitSemaphore	 = INVALID_HANDLE_VALUE;
+HANDLE hFileWaitSemaphore	 = INVALID_HANDLE_VALUE;
+HANDLE hReceiveThread		 = INVALID_HANDLE_VALUE;
+HANDLE hTransmitThread		 = INVALID_HANDLE_VALUE;
 char szFile[260];				// buffer for file name
 HANDLE hf;						// file handle
 HANDLE hComm;
@@ -101,10 +102,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lspszCmdParam
 	
 	// Non-Window related inits
 	hComm = 0;
+	hWaitForLineSemaphore = CreateSemaphore(NULL, 0, 1, NULL);
 	hACKWaitSemaphore	= CreateSemaphore(NULL, 1, 1, NULL);
 	hFileWaitSemaphore	= CreateSemaphore(NULL, 0, 1, NULL);
 
-	if (hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE ||
+	if (hWaitForLineSemaphore == NULL || hWaitForLineSemaphore == INVALID_HANDLE_VALUE ||
+		hACKWaitSemaphore == NULL || hACKWaitSemaphore == INVALID_HANDLE_VALUE ||
 		hFileWaitSemaphore == NULL || hFileWaitSemaphore == INVALID_HANDLE_VALUE)
 	{
 		MessageBox(MainWindow, TEXT("Couldn't acquire semaphores"), TEXT("Creation error"), MB_OK);

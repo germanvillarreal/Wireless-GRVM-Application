@@ -23,7 +23,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "Transport.h"
-INT waitForType = NUL;
+INT waitForType = ENQ;
 INT sentPacketCounter = 0;	/* Counter to keep track of our file location as
 							 as well as how many packets we've sent. */
 BOOL bHaveFileToSend = FALSE;
@@ -67,6 +67,14 @@ DWORD WINAPI TransmitThread(LPVOID param)
 	
 	do
 	{
+		// Send ENQ - for getting the right-of-way to send
+		//if () // check if we're already receiving some data
+		SendControl(hComm, ENQ);
+
+		// Wait for ACK
+		waitForType = ACK;
+		WaitForSingleObject(hACKWaitSemaphore, INFINITE);
+
 		packetToSend = Packetize(file, sentPacketCounter, &bDoneSending);
 		while (++sentPacketCounter % 6 != 0) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 		{
@@ -79,8 +87,6 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			}
 			// Set "What we're waiting for" to ACK
 			waitForType = ACK;
-
-			
 
 		}
 		// Another semaphore to determine when to start again.
@@ -164,35 +170,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 		} //while want to read
 	} //while forever
 
-	/*// Non-overlapped 
-	while (1) // forever
-	{
-		while (bWantToRead) // while we want to read
-		{
-			// wait for event
-			if (WaitCommEvent(hComm, &dwEvent, NULL))
-			{
-				// Comm Event happened!
-				// reset the comm errors
-				ClearCommError(hComm, &dwError, &cs);
-				if ((dwEvent & EV_RXCHAR) && cs.cbInQue)
-				{
-					// read from serial port
-					if(!ReadSerialPort(hComm, packetBuffer, cs.cbInQue, &nBytesRead))
-					{
-						// error
-					}
-					else
-
-					{
-						// read success
-						// PacketCheck
-					}
-				}
-			}
-		}
-		Sleep(250);
-	}*/
+	
 	CloseHandle(ov.hEvent);
 	ExitThread(EXIT_SUCCESS);
 }
