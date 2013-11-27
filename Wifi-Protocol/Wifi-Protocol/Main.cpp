@@ -11,7 +11,7 @@
 -- BOOL Window_OnCreate(HWND)
 -- void Window_OnCommand (HWND, int, HWND, UINT)
 -- void Window_OnDestroy (HWND);
--- BOOL CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM);
+-- BOOL CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM)
 -- void OpenFileInitialize(HWND )
 -- BOOL FileOpenDlg(HWND, PTSTR, PTSTR)
 -- BOOL FileRead(HWND, PTSTR)
@@ -426,6 +426,7 @@ BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 -- November 18, 2013 - Robin Hsieh: Added the enabling and disabling menu items.
 -- November 25, 2013 - Vincent Lau: Added creation of the Transmit thread after successful file read operation
 -- November 26, 2013 - Mat Siwoski: Added case for saving displayed text.
+-- November 27, 2013 - Robin Hsieh: Tested ErrorCheck in the file being read in.
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -462,6 +463,11 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
                 }
 				else // success file read
 				{
+					/*
+					Testing of the ErrorCheck function by passing in the data
+					BOOL errchk = ErrorCheck((char*)pszFileText);
+					*/
+					
 					// Clean up thread
 					TerminateThread(hTransmitThread, 0);
 					CloseHandle(hTransmitThread);
@@ -702,7 +708,7 @@ void OkMessage(HWND hwnd, TCHAR* szMessage, TCHAR* szTitleName)
 -- NOTES:
 -- This function proceeds the FileOpen function and is used to read in the file.
 ------------------------------------------------------------------------------------------------------------------*/
-BOOL FileRead(HWND hwnd, LPCSTR pstrFileName){
+BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
 
 	HANDLE hFile;
     BOOL bSuccess = FALSE;
@@ -797,7 +803,7 @@ BOOL FileSave(HWND hwnd, LPCTSTR pstrFileName){
     {
         DWORD dwTextLength;
 
-        dwTextLength = GetWindowTextLength(hwnd);
+		dwTextLength = strlen(pszFileText);
         // No need to bother if there's no text.
         if(dwTextLength > 0)
         {
@@ -807,13 +813,17 @@ BOOL FileSave(HWND hwnd, LPCTSTR pstrFileName){
             pszText = (LPSTR) GlobalAlloc(GPTR, dwBufferSize);
             if(pszText != NULL)
             {
-                if(GetWindowText(hwnd, pszText, dwBufferSize))
+				DWORD dwWritten;
+				if(WriteFile(hFile, pszFileText, dwTextLength, &dwWritten, NULL))
+                        bSuccess = TRUE;
+
+                /*if(GetWindowText(hwnd, pszText, dwBufferSize))
                 {
                     DWORD dwWritten;
 
                     if(WriteFile(hFile, pszText, dwTextLength, &dwWritten, NULL))
                         bSuccess = TRUE;
-                }
+                }*/
                 GlobalFree(pszText);
             }
         }
