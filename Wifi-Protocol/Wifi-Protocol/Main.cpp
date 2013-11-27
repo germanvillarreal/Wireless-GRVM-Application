@@ -797,7 +797,7 @@ BOOL FileSave(HWND hwnd, LPCTSTR pstrFileName){
     {
         DWORD dwTextLength;
 
-        dwTextLength = GetWindowTextLength(hwnd);
+		dwTextLength = strlen(pszFileText);
         // No need to bother if there's no text.
         if(dwTextLength > 0)
         {
@@ -807,13 +807,17 @@ BOOL FileSave(HWND hwnd, LPCTSTR pstrFileName){
             pszText = (LPSTR) GlobalAlloc(GPTR, dwBufferSize);
             if(pszText != NULL)
             {
-                if(GetWindowText(hwnd, pszText, dwBufferSize))
+				DWORD dwWritten;
+				if(WriteFile(hFile, pszFileText, dwTextLength, &dwWritten, NULL))
+                        bSuccess = TRUE;
+
+                /*if(GetWindowText(hwnd, pszText, dwBufferSize))
                 {
                     DWORD dwWritten;
 
                     if(WriteFile(hFile, pszText, dwTextLength, &dwWritten, NULL))
                         bSuccess = TRUE;
-                }
+                }*/
                 GlobalFree(pszText);
             }
         }
