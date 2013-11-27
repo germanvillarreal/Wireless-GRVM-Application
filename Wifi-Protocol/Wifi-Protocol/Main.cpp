@@ -18,6 +18,8 @@
 -- void OkMessage(HWND, TCHAR*, TCHAR*)
 -- void DisplayText(HWND, LPCSTR)
 -- void Window_OnVScroll(HWND, HWND, UINT, int)
+-- BOOL FileSave(HWND, LPCTSTR)
+-- BOOL FileSaveDlg (HWND, PTSTR, PTSTR)
 --
 -- DATE: November 12, 2013
 --
@@ -25,6 +27,7 @@
 -- November 12, 2013 - Mat Siwoski: Added Window_OnCreate, OpenFileInitialize, FileOpenDlg & FileRead
 -- November 23, 2013 - Mat Siwoski: Added DisplayText, Window_OnVScroll & custom Icon
 -- November 24, 2013 - Mat Siwoski: Added Window_OnPaint, Window_OnSize
+-- November 25, 2013 - Mat Siwoski: Added FileSave & PopFileSaveDlg
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -422,6 +425,7 @@ BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 -- November 13, 2013 - Mat Siwoski: Implementation of the Config option.
 -- November 18, 2013 - Robin Hsieh: Added the enabling and disabling menu items.
 -- November 25, 2013 - Vincent Lau: Added creation of the Transmit thread after successful file read operation
+-- November 26, 2013 - Mat Siwoski: Added case for saving displayed text.
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -464,6 +468,14 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 					ReleaseSemaphore(hFileWaitSemaphore, 1, NULL);
 					// create transmit thread for this file
 					hTransmitThread = CreateThread(NULL, 0, TransmitThread, pszFileText, 0, &dwTransmitThreadID);
+				}
+			}
+			break;
+		case IDM_SAVEFILE:
+			if (FileSaveDlg(hwnd, szFileName, szTitleName)){
+				if (!FileSave(hwnd, szFileName)){
+					OkMessage(hwnd, TEXT ("Could not write file %s"), szTitleName) ;
+					break;
 				}
 			}
 			break;
@@ -753,4 +765,89 @@ void DisplayText(HWND hwnd, LPCSTR text){
 	hdc = GetDC(hwnd);
 	DrawText(hdc, pszFileText, -1, &drawingArea, DT_WORDBREAK);
 	ReleaseDC(hwnd, hdc);
+}
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: FileRead
+--
+-- DATE: November 12, 2013
+--
+-- REVISIONS: 
+--
+-- DESIGNER: Mat Siwoski
+--
+-- PROGRAMMER: Mat Siwoski
+--
+-- INTERFACE: BOOL FileSave(HWND hwnd, LPCTSTR pstrFileName)
+--				HWND hwndEdit: Handle to the file selection
+--				LPCTSTR pstrFileName: Pointer to the file name
+--
+-- RETURNS: Returns true if able to successfully save the file.
+--
+-- NOTES:
+-- This function proceeds the FileSaveDlg function and is used to read in the file.
+------------------------------------------------------------------------------------------------------------------*/
+BOOL FileSave(HWND hwnd, LPCTSTR pstrFileName){
+    HANDLE hFile;
+    BOOL bSuccess = FALSE;
+
+    hFile = CreateFile(pstrFileName, GENERIC_WRITE, 0, NULL,
+        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(hFile != INVALID_HANDLE_VALUE)
+    {
+        DWORD dwTextLength;
+
+        dwTextLength = GetWindowTextLength(hwnd);
+        // No need to bother if there's no text.
+        if(dwTextLength > 0)
+        {
+            LPSTR pszText;
+            DWORD dwBufferSize = dwTextLength + 1;
+
+            pszText = (LPSTR) GlobalAlloc(GPTR, dwBufferSize);
+            if(pszText != NULL)
+            {
+                if(GetWindowText(hwnd, pszText, dwBufferSize))
+                {
+                    DWORD dwWritten;
+
+                    if(WriteFile(hFile, pszText, dwTextLength, &dwWritten, NULL))
+                        bSuccess = TRUE;
+                }
+                GlobalFree(pszText);
+            }
+        }
+        CloseHandle(hFile);
+    }
+    return bSuccess;
+}
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: FileSaveDlg
+--
+-- DATE: November 12, 2013
+--
+-- REVISIONS: 
+--
+-- DESIGNER: Mat Siwoski
+--
+-- PROGRAMMER: Mat Siwoski
+--
+-- INTERFACE: BOOL FileSaveDlg (HWND hwnd, PTSTR pstrFileName, PTSTR pstrTitleName)
+--				HWND hwndEdit: Handle to the file selection
+--				PTSTR pstrFileName: Pointer to the file name
+--				PTSTR pstrTitleName: Pointer to the title name
+--
+-- RETURNS: Returns true if able to successfully open a save dialog box so user can choose where to save.
+--
+-- NOTES:
+-- This function sets values for the openfilename struct and allows 
+------------------------------------------------------------------------------------------------------------------*/
+BOOL FileSaveDlg (HWND hwnd, PTSTR pstrFileName, PTSTR pstrTitleName){
+     ofn.hwndOwner         = hwnd ;
+     ofn.lpstrFile         = pstrFileName ;
+     ofn.lpstrFileTitle    = pstrTitleName ;
+     ofn.Flags             = OFN_OVERWRITEPROMPT ;
+     
+     return GetSaveFileName (&ofn) ;
 }

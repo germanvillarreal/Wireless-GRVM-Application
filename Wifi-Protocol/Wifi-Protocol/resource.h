@@ -7,6 +7,7 @@
 #define IDM_CONFIG					40003
 #define IDM_ABOUT					40004
 #define IDM_EXIT					40005
+#define IDM_SAVEFILE				40006
 #define IDM_APP_ABOUT               40018
 #define ID_OK						40019
 #define IDC_STATIC					40020

@@ -27,7 +27,10 @@ BOOL ErrorCheck(char);
 void DisplayText(HWND, LPCSTR);
 void Window_OnVScroll(HWND, HWND, UINT, int);
 void Window_OnPaint(HWND);
-void Window_OnSize(HWND hwnd, UINT state, int cx, int cy);
+void Window_OnSize(HWND, UINT, int, int);
+BOOL FileSave(HWND, LPCTSTR);
+BOOL FileSaveDlg (HWND, PTSTR, PTSTR);
+
 // Variables
 const LPTSTR lpszCommName	= TEXT("COM1");
 
