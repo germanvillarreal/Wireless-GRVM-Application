@@ -11,3 +11,5 @@
 #define IDM_APP_ABOUT               40018
 #define ID_OK						40019
 #define IDC_STATIC					40020
+#define IDC_MAIN_STATUS				40021
+#define IDC_MAIN_TOOL				40022

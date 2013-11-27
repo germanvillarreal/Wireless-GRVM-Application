@@ -267,7 +267,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 ------------------------------------------------------------------------------------------------------------------*/
 void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
 	RECT drawingArea;
-
+	HWND hStatus, hTool;
+    RECT rcStatus, rcTool;
+    int iStatusHeight, iToolHeight;
+	HWND hEdit;
+    int iEditHeight;
+    RECT rcClient;
+	
 	GetClientRect(hwnd, &drawingArea);
 
 	si.cbSize = sizeof(si);
@@ -279,6 +285,22 @@ void Window_OnSize(HWND hwnd, UINT state, int cx, int cy){
 	si.nPos = 0;
 	
 	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+
+	hStatus = GetDlgItem(hwnd, IDC_MAIN_STATUS);
+    SendMessage(hStatus, WM_SIZE, 0, 0);
+
+	hTool = GetDlgItem(hwnd, IDC_MAIN_TOOL);
+    SendMessage(hTool, TB_AUTOSIZE, 0, 0);
+
+    GetWindowRect(hTool, &rcTool);
+    iToolHeight = rcTool.bottom - rcTool.top;
+
+    GetWindowRect(hStatus, &rcStatus);
+    iStatusHeight = rcStatus.bottom - rcStatus.top;
+
+	
+
+  
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -411,6 +433,24 @@ void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
 -- This function deals with the selection in the menu on the main window. 
 ------------------------------------------------------------------------------------------------------------------*/
 BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
+	HWND hStatus, hTool;
+	int statwidths[] = {100, -1};
+ 
+	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0,
+				 hwnd, (HMENU)IDC_MAIN_STATUS, GetModuleHandle(NULL), NULL);
+	if(hStatus == NULL){
+		MessageBox(hwnd, "Could not create StatusBar.", "Error", MB_OK | MB_ICONERROR);
+	}
+	hTool = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, WS_CHILD | WS_VISIBLE, 0, 0, 0, 0,
+        hwnd, (HMENU)IDC_MAIN_TOOL, GetModuleHandle(NULL), NULL);
+	if(hTool == NULL){
+				MessageBox(hwnd, "Could not create tool bar.", "Error", MB_OK | MB_ICONERROR);
+	}
+ 
+	SendMessage(hStatus, SB_SETPARTS, sizeof(statwidths)/sizeof(int), (LPARAM)statwidths);
+	SendMessage(hStatus, SB_SETTEXT, 0, (LPARAM)"Status");
+	
+	
 	OpenFileInitialize(hwnd);
 	return TRUE;
 }
@@ -463,10 +503,10 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
                 }
 				else // success file read
 				{
-					/*
-					Testing of the ErrorCheck function by passing in the data
+					
+					//Testing of the ErrorCheck function by passing in the data
 					BOOL errchk = ErrorCheck((char*)pszFileText);
-					*/
+					
 					
 					// Clean up thread
 					TerminateThread(hTransmitThread, 0);
@@ -858,6 +898,6 @@ BOOL FileSaveDlg (HWND hwnd, PTSTR pstrFileName, PTSTR pstrTitleName){
      ofn.lpstrFile         = pstrFileName ;
      ofn.lpstrFileTitle    = pstrTitleName ;
      ofn.Flags             = OFN_OVERWRITEPROMPT ;
-     
+	     
      return GetSaveFileName (&ofn) ;
 }

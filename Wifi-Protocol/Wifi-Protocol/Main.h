@@ -4,6 +4,7 @@
 #include "Includes.h"
 #include "Session.h"
 #include "Transport.h"
+#include <commctrl.h>
 
 #define UNTITLED TEXT ("(untitled)")
 #define EDITID   1
