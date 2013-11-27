@@ -3,6 +3,7 @@
 
 #include "Includes.h"
 #include "Vars.h"
+#include "Physical.h"
 
 #define DATA_PACKET			6000
 #define CTL_PACKET			6001
@@ -21,6 +22,10 @@ BOOL PacketCheck(HWND, char[1024], int*);
 extern HANDLE hWaitForLineSemaphore;
 extern HANDLE hACKWaitSemaphore;
 extern HANDLE hFileWaitSemaphore;
+extern HANDLE hComm;
 extern INT waitForType;
-
+extern BOOL bENQToSend;
+extern BOOL bENQReceived;
+extern BOOL bWantLine;
+extern LPSTR packetToSend;
 #endif
