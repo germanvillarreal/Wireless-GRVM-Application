@@ -21,7 +21,7 @@ void Window_OnDestroy (HWND);
 BOOL CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM);
 void OpenFileInitialize(HWND);
 BOOL FileOpenDlg (HWND, PTSTR, LPCSTR);
-BOOL FileRead(HWND, LPCSTR);
+BOOL FileRead(HWND, const LPCSTR);
 void OkMessage(HWND, TCHAR*, TCHAR*);
 BOOL ErrorCheck(char);
 void DisplayText(HWND, LPCSTR);

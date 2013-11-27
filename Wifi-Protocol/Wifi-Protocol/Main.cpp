@@ -702,7 +702,7 @@ void OkMessage(HWND hwnd, TCHAR* szMessage, TCHAR* szTitleName)
 -- NOTES:
 -- This function proceeds the FileOpen function and is used to read in the file.
 ------------------------------------------------------------------------------------------------------------------*/
-BOOL FileRead(HWND hwnd, LPCSTR pstrFileName){
+BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
 
 	HANDLE hFile;
     BOOL bSuccess = FALSE;
