@@ -4,17 +4,17 @@
 -- PROGRAM: Wireless-MRGV
 --
 -- FUNCTIONS:
--- 
---
+-- unsigned short CRCCCITT(unsigned char *data, size_t length, unsigned short seed, unsigned short final)
+-- BOOL ErrorCheck(char pkt[1020])
 --
 -- DATE: November 18, 2013
 --
 -- REVISIONS:  
 -- 
 --
--- DESIGNER: Mat Siwoski
+-- DESIGNER: Robin Hsieh
 --
--- PROGRAMMER: Mat Siwoski
+-- PROGRAMMER: Robin Hsieh
 --
 -- NOTES:
 -- Using the CRC-CCITT code, taken from http://automationwiki.com/index.php?title=CRC-16-CCITT.
@@ -81,9 +81,9 @@ static unsigned short crc_table [256] = {
 --
 -- REVISIONS: 
 --
--- DESIGNER: Mat Siwoski
+-- DESIGNER: Robin Hsieh
 --
--- PROGRAMMER: Mat Siwoski
+-- PROGRAMMER: Robin Hsieh
 --
 -- INTERFACE: unsigned short CRCCCITT(unsigned char *data, size_t length, unsigned short seed, unsigned short final)
 --				unsigned char *data: The data that needs to be generated
@@ -141,55 +141,11 @@ BOOL ErrorCheck(char pkt[1020]){
 	the_crc = CRCCCITT(buff, TEST_SIZE + 2, 0xffff, 0);
 	printf("Final CRC value is 0x%04X\n", the_crc);
 
+	// If the remainder of "the_crc" should be 0 if everything is correct.
 	if(the_crc == 0)
 	{
 		successful = true;
 	}
 
-
-	//return EXIT_SUCCESS;
 	return successful;
-
-
-	/*
-	FILE *fin;
-	size_t how_many;
-	unsigned short the_crc;
-	unsigned char buff [TEST_SIZE + 2];
-
-	if (argc < 2)
-	{
-	puts("usage: crcccitt filename");
-	return EXIT_FAILURE;
-	}
-	else if (NULL == (fin = fopen(argv[1], "rb")))
-	{
-	printf("crcccitt: can't open %s\n", argv[1]);
-	return EXIT_FAILURE;
-	}
-
-	how_many = fread(buff, 1, TEST_SIZE, fin);
-
-	fclose(fin);
-
-	if (how_many != TEST_SIZE)
-	{
-	printf("crcccitt: error reading %s\n", argv[1]);
-	return EXIT_FAILURE;
-	}
-
-	the_crc = CRCCCITT(buff, TEST_SIZE, 0xffff, 0);
-	printf("Initial CRC value is 0x%04X\n", the_crc);
-
-	buff [TEST_SIZE] = (unsigned char)((the_crc >> 8) & 0xff);
-	buff [TEST_SIZE + 1] = (unsigned char)(the_crc & 0xff);
-
-	the_crc = CRCCCITT(buff, TEST_SIZE + 2, 0xffff, 0);
-	printf("Final CRC value is 0x%04X\n", the_crc);
-
-	return EXIT_SUCCESS;
-	*/
-
-
-	return TRUE;
 }

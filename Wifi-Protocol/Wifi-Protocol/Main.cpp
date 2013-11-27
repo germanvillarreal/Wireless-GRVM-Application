@@ -11,7 +11,7 @@
 -- BOOL Window_OnCreate(HWND)
 -- void Window_OnCommand (HWND, int, HWND, UINT)
 -- void Window_OnDestroy (HWND);
--- BOOL CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM);
+-- BOOL CALLBACK AboutDlgProc (HWND, UINT, WPARAM, LPARAM)
 -- void OpenFileInitialize(HWND )
 -- BOOL FileOpenDlg(HWND, PTSTR, PTSTR)
 -- BOOL FileRead(HWND, PTSTR)
@@ -426,6 +426,7 @@ BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 -- November 18, 2013 - Robin Hsieh: Added the enabling and disabling menu items.
 -- November 25, 2013 - Vincent Lau: Added creation of the Transmit thread after successful file read operation
 -- November 26, 2013 - Mat Siwoski: Added case for saving displayed text.
+-- November 27, 2013 - Robin Hsieh: Tested ErrorCheck in the file being read in.
 --
 -- DESIGNER: Mat Siwoski
 --
@@ -464,8 +465,9 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 				{
 					/*
 					Testing of the ErrorCheck function by passing in the data
-					*/
 					BOOL errchk = ErrorCheck((char*)pszFileText);
+					*/
+					
 					// Clean up thread
 					TerminateThread(hTransmitThread, 0);
 					CloseHandle(hTransmitThread);
