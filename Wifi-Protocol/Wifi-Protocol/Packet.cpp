@@ -76,35 +76,35 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter, CHAR* packet)
 BOOL PacketCheck(HWND hwnd, char packet[1024])
 {
 	// Make sure we're getting our own packets, not some other packet
-	switch (packet[0])
-	{
-	case SYN:
-		break;
-	default: // discard packet
-		return FALSE;
-	}
+	//switch (packet[0])
+	//{
+	//case SYN:
+	//	break;
+	//default: // discard packet
+	//	return FALSE;
+	//}
 
 //HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	switch (packet[1])
 	{
-	case ENQ:
-		bENQReceived = TRUE;
-		SendControl(hComm, ACK);
-		//Set "what we're waiting for" flag to DC1
-		waitForType = DC1;
-	break;
-	case ACK:
-		// check if we wanted an ACK
-		if (waitForType == ACK)
-		{
-			// check if we're actually bidding for the line
-			if (bWantLine)
-				ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
-			else
-			// check if we're sending a file
-				ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
-		}
-	break;
+	//case ENQ:
+	//	bENQReceived = TRUE;
+	//	SendControl(hComm, ACK);
+	//	//Set "what we're waiting for" flag to DC1
+	//	waitForType = DC1;
+	//break;
+	//case ACK:
+	//	// check if we wanted an ACK
+	//	if (waitForType == ACK)
+	//	{
+	//		// check if we're actually bidding for the line
+	//		if (bWantLine)
+	//			ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
+	//		else
+	//		// check if we're sending a file
+	//			ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
+	//	}
+	//break;
 
 	case DC1:
 		//if we're waiting for a DC2 packet
@@ -158,16 +158,16 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 		SendData(hComm, packetToSend); // send the previous packet
 	break;
 		
-	case EOT:
-		bENQReceived = FALSE;
-		if (bENQToSend)
-		{
-			ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
-			break;
-		}
-		// GO back to IDLE state
-		waitForType = ENQ;
-	break;
+	//case EOT:
+	//	bENQReceived = FALSE;
+	//	if (bENQToSend)
+	//	{
+	//		ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
+	//		break;
+	//	}
+	//	// GO back to IDLE state
+	//	waitForType = ENQ;
+	//break;
     }
 	return TRUE;
 }

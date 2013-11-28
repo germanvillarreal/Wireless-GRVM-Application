@@ -77,24 +77,24 @@ DWORD WINAPI TransmitThread(LPVOID param)
 	do
 	{
 		// Send ENQ - for getting the right-of-way to send
-		bENQToSend = TRUE;
-		if (bENQReceived) // if The other guy is sending something
-		{
-			WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
-		}
-		
+		//bENQToSend = TRUE;
+		//if (bENQReceived) // if The other guy is sending something
+		//{
+		//	WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
+		//}
+		//
 		SendControl(hComm, ENQ);// REQUEST DA LINE
-
-		// Wait for ACK
-		waitForType = ACK;
-		bWantLine = TRUE;
-		WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
-		bWantLine = FALSE;
+		SendData(hComm, "TEST");
+		//// Wait for ACK
+		//waitForType = ACK;
+		//bWantLine = TRUE;
+		//WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
+		//bWantLine = FALSE;
 		
 		while (++sentPacketCounter % 6 != 0) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 		{
 			// semaphore decrement 
-			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
+			//WaitForSingleObject(hACKWaitSemaphore, INFINITE);
 
 			Packetize(file, (sentPacketCounter - 1), packetToSend);
 				
@@ -184,7 +184,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 			}
 			else // Event Object was signaled with an error
 			{
-				MessageBox(NULL, TEXT("Receive WFSO error"), NULL, MB_OK);
+				
 			}
 			ResetEvent(ov.hEvent);
 		} //while want to read
