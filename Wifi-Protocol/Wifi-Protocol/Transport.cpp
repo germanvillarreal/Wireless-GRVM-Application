@@ -178,8 +178,8 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				if (ReadSerialPort(hComm, packetBuffer, cs.cbInQue, &nBytesRead))
 				{	
 					// Successful read, send to packet check
-					
-					//MessageBox(*(HWND*)lphwnd, packetBuffer, NULL, MB_OK); DEBUG
+					PacketCheck(*(HWND*)lphwnd, packetBuffer);
+
 				}
 			}
 			else // Event Object was signaled with an error

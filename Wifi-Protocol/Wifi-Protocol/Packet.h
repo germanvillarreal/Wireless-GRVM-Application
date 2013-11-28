@@ -19,7 +19,7 @@
 
 // Function Prototypes
 BOOL Packetize(CHAR*, int, CHAR*);
-BOOL PacketCheck(HWND, char[1024], int*);
+BOOL PacketCheck(HWND, char[1024]);
 
 
 // vars
