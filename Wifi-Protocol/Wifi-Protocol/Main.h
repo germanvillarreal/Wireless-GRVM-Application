@@ -25,7 +25,7 @@ BOOL FileOpenDlg (HWND, PTSTR, LPCSTR);
 BOOL FileRead(HWND, const LPCSTR);
 void OkMessage(HWND, TCHAR*, TCHAR*);
 BOOL ErrorCheck(char*);
-char* GenerateCRC(char*, char*);
+void GenerateCRC(char*, char*);
 void DisplayText(HWND, LPCSTR);
 void Window_OnVScroll(HWND, HWND, UINT, int);
 void Window_OnPaint(HWND);
