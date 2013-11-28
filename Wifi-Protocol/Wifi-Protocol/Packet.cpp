@@ -59,10 +59,16 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter, CHAR* packet)
 	packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
 
 	// Add data bytes to the packet
-	packet[2] = data[PACKET_BYTES_DATA];
+	for(size_t i = 0; i < PACKET_BYTES_DATA; i++)
+		packet[i+2] = data[i];
 	
 	// Add the trailer bytes to the packet (CRC)
-	//packet[PACKET_BYTES_DATA] = ;
+	
+	char pktral[2];
+	//char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE], char generatedCRC[2]){ // GENERATE_CRC_TEST_SIZE = 1020
+	GenerateCRC(packet, pktral);
+	packet[PACKET_BYTES_DATA+2] = pktral[0];
+	packet[PACKET_BYTES_DATA+3] = pktral[1];
 
 	return isDone;
 }
