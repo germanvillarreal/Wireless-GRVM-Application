@@ -811,7 +811,7 @@ BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
        CloseHandle(hFile);
     }
 	//DISPLAY TEXT (THIS WILL NEED TO GO IN DISPLAY FUNCTION AFTER READING A FILE
-	DisplayText(hEdit, pszFileText);
+	//DisplayText(hEdit, pszFileText);
 	
     return bSuccess;
 }

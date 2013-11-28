@@ -4,6 +4,8 @@
 #include "Includes.h"
 #include "Vars.h"
 #include "Physical.h"
+#include "Main.h"
+#include "Presentation.h"
 
 #define DATA_PACKET			6000
 #define CTL_PACKET			6001
@@ -11,12 +13,14 @@
 #define PACKET_BYTES_CTL	2
 #define PACKET_BYTES_DATA	1020
 #define PACKET_BYTES_TOTAL	PACKET_BYTES_CTL + PACKET_BYTES_DATA
+//#define PACKET_BYTES_CRC
 
 
 
 // Function Prototypes
-CHAR* Packetize(CHAR*, int, BOOL*);
+BOOL Packetize(CHAR*, int, CHAR*);
 BOOL PacketCheck(HWND, char[1024], int*);
+
 
 // vars
 extern HANDLE hWaitForLineSemaphore;
@@ -28,4 +32,6 @@ extern BOOL bENQToSend;
 extern BOOL bENQReceived;
 extern BOOL bWantLine;
 extern LPSTR packetToSend;
+extern LPSTR displayBuffer;
+
 #endif

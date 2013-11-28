@@ -31,16 +31,15 @@
 
 #include "Packet.h"
 
-CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter, BOOL* isDone)
+BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter, CHAR* packet)
 {
 	char data[PACKET_BYTES_DATA];
-	char packet[PACKET_BYTES_TOTAL];
 	//size_t ndx;
 	size_t fileSize = strlen(bufferWithFile);
-
+	BOOL isDone = FALSE;
 	//1020 x sentPacketCounter = startingLocation
 	int StartLoc = PACKET_BYTES_DATA * sentPacketCounter;
-	if(StartLoc * PACKET_BYTES_DATA > fileSize)
+	if(StartLoc * PACKET_BYTES_DATA > (int)fileSize)
 	{
 		fprintf(stderr, "%s", "Cannot seek to this location..");
 		return 0;
@@ -51,34 +50,11 @@ CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter, BOOL* isDone)
 		if(bufferWithFile[i] == '\0' || bufferWithFile[i] == EOF)
 		{
 			data[i] = '\0';
-			*isDone = TRUE;
+			isDone = TRUE;
 		}
 		data[i] = bufferWithFile[i];
 	}
 	
-/*
-	// Go to the begining of the line
-	
-	// Read 1020 chars from the file buffer, starting at startingLocation into packet string
-	if(fgets(data, PACKET_BYTES_DATA, bufferWithFile) == NULL)
-	{
-		fprintf(stderr, "%s", "Unable to read the next line..");
-		//return 
-	}
-
-	// If we encounter eof
-	for(ndx = 0; ndx < PACKET_BYTES_DATA; ndx++)
-	{
-		if(data[ndx] == EOF)
-			break;
-	}
-
-	// Pad remains Bytes with null
-	while(ndx < PACKET_BYTES_DATA)
-	{
-		data[ndx] = '\0';
-	}
-	*/
 	// Add control bytes to the packet
 	packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
 
@@ -88,9 +64,8 @@ CHAR* Packetize(CHAR* bufferWithFile, int sentPacketCounter, BOOL* isDone)
 	// Add the trailer bytes to the packet (CRC)
 	//packet[PACKET_BYTES_DATA] = ;
 
-	return packet;
+	return isDone;
 }
-
 
 BOOL PacketCheck(HWND hwnd, char packet[1024])
 {
@@ -124,42 +99,53 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 				ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
 		}
 	break;
-	/*
+
 	case DC1:
 		//if we're waiting for a DC2 packet
-		if(waitForType == DC2)
+
+		char p[1022];
+		for(size_t i = 2; i < 1024; i++)
+			p[i - 2] = packet[i];
+
+		if(waitForType == DC2 || !ErrorCheck(p))//pass data+crcbits
 		{
 			SendControl(hComm, NAK);
 			break;
 		}
-
-		if (!ErrorCheck(packet[1022], packet[1023]))
-		{
-			//send(NAK);
-			break;
-		}
 	
-		send (ACK);
-		Display(hwnd);//read the remaining 1020 characters 
+		SendControl(hComm, ACK);
+		//add to buffer
+		char p2[1020];
+		for(size_t i = 2; i < 1022; i++)
+			p2[i - 2] = packet[i];
+		AddToBuffer(p2);
+
+		//Display(hwnd, );//read the remaining 1020 characters 
 	break;
 	
 			
 	case DC2:
 		// if we're waiting for a DC1 packet
-		if (*waitForType == DC1)
+		if (waitForType == DC1)
 		{
-			send (NAK);
+			SendControl(hComm, NAK);
 			break;
 		}
-		if (!ErrorCheck(char[1022], char[1023]))
+
+		char p3[1022];
+		for(size_t i = 2; i < 1024; i++)
+			p3[i - 2] = packet[i];
+
+
+		if (!ErrorCheck(p3))
 		{
-			sendControlPacket (NAK);
+			SendControl(hComm, NAK);
 			break;
 		}
-		send (ACK);
-		Display();//read the remaining 1020 characters 
-	break;; */
-		
+		SendControl(hComm, ACK);
+		//Display();//read the remaining 1020 characters 
+	break;
+
 	case NAK:
 		//Set "What we're waiting for" flag to ACK
 		waitForType = ACK;

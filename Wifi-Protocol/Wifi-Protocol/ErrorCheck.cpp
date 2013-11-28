@@ -175,10 +175,10 @@ BOOL ErrorCheck(char pkt[ERROR_CHECK_TEST_SIZE]){ // ERROR_CHECK_TEST_SIZE = 102
 -- NOTES:
 -- This function generates the 2 CRC characters so it can be appended to the end of every packet being sent.
 ------------------------------------------------------------------------------------------------------------------*/
-char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE]){ // GENERATE_CRC_TEST_SIZE = 1020
+char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE], char generatedCRC[2]){ // GENERATE_CRC_TEST_SIZE = 1020
 	unsigned short the_crc;
 
-	char generatedCRC[2];
+	//char generatedCRC[2];
 
 	the_crc = CRCCCITT(pkt, GENERATE_CRC_TEST_SIZE, 0xffff, 0);
 	printf("Initial CRC value is 0x%04X\n", the_crc);

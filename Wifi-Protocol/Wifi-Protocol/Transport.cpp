@@ -96,7 +96,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			// semaphore decrement 
 			WaitForSingleObject(hACKWaitSemaphore, INFINITE);
 
-			packetToSend = Packetize(file, (sentPacketCounter - 1), &bDoneSending);
+			Packetize(file, (sentPacketCounter - 1), packetToSend);
 				
 			SendData(hComm, packetToSend); // Send data to Serial Port
 				
