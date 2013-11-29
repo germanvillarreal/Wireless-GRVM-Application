@@ -115,11 +115,7 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 	case DC1:
 		//if we're waiting for a DC2 packet
 
-		char p[1022];
-		for(size_t i = 2; i < 1024; i++)
-			p[i - 2] = packet[i];
-
-		if(waitForType == DC2 || !ErrorCheck(p))//pass data+crcbits
+		if(waitForType == DC2 || !ErrorCheck(packet+2))//pass data+crcbits
 		{
 			SendControl(hComm, NAK);
 			break;
@@ -132,13 +128,13 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 			p2[i - 2] = packet[i];
 		AddToBuffer(p2);
 
-		//Display(hwnd, );//read the remaining 1020 characters 
+		DisplayText(hwnd, displayBuffer);
 	break;
 	
 			
 	case DC2:
 		// if we're waiting for a DC1 packet
-		if (waitForType == DC1)
+		if (waitForType == DC1 || ErrorCheck(packet+2))
 		{
 			SendControl(hComm, NAK);
 			break;
@@ -148,14 +144,15 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 		for(size_t i = 2; i < 1024; i++)
 			p3[i - 2] = packet[i];
 
-
-		if (!ErrorCheck(p3))
-		{
-			SendControl(hComm, NAK);
-			break;
-		}
 		SendControl(hComm, ACK);
-		//Display();//read the remaining 1020 characters 
+
+		//add to buffer
+		char p2[1020];
+		for(size_t i = 2; i < 1022; i++)
+			p2[i - 2] = packet[i];
+		AddToBuffer(p2);
+
+		DisplayText(hwnd, displayBuffer);
 	break;
 
 	case NAK:
