@@ -36,10 +36,10 @@
     <ClInclude Include="Physical.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Packet.h">
+    <ClInclude Include="Presentation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Presentation.h">
+    <ClInclude Include="Packet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
