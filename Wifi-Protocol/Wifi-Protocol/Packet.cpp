@@ -81,6 +81,7 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 
 BOOL PacketCheck(HWND hwnd, char packet[1024])
 {
+	char p2[1020];
 	// Make sure we're getting our own packets, not some other packet
 	//switch (packet[0])
 	//{
@@ -123,7 +124,7 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 	
 		SendControl(hComm, ACK);
 		//add to buffer
-		char p2[1020];
+//		char p2[1020];
 		for(size_t i = 2; i < 1022; i++)
 			p2[i - 2] = packet[i];
 		AddToBuffer(p2);
@@ -147,7 +148,7 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 		SendControl(hComm, ACK);
 
 		//add to buffer
-		char p2[1020];
+//		char p2[1020];
 		for(size_t i = 2; i < 1022; i++)
 			p2[i - 2] = packet[i];
 		AddToBuffer(p2);
