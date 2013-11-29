@@ -7,7 +7,6 @@
 
 // Function prototypes
 DWORD WINAPI TransmitThread(LPVOID);
-BOOL PacketCheck(HWND, char[1024], int*);
 DWORD WINAPI ReceiveThread	(LPVOID);
 
 // Vars

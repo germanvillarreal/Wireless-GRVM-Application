@@ -29,7 +29,6 @@ extern INT waitForType;
 extern BOOL bENQToSend;
 extern BOOL bENQReceived;
 extern BOOL bWantLine;
-extern LPSTR packetToSend;
 extern LPSTR displayBuffer;
 
 #endif

@@ -31,7 +31,7 @@
 
 #include "Packet.h"
 
-CHAR packet[PACKET_BYTES_TOTAL];
+CHAR Packet[PACKET_BYTES_TOTAL];
 
 BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 {
@@ -60,19 +60,19 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 	}
 	
 	// Add control bytes to the packet
-	packet[0] = SYN;
-	packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
+	Packet[0] = SYN;
+	Packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
 
 	// Add data bytes to the packet
 	for(size_t i = 0; i < PACKET_BYTES_DATA; i++)
-		packet[i+2] = data[i];
+		Packet[i+2] = data[i];
 	
 	// Add the trailer bytes to the packet (CRC)
 	char pktral[2];
 	//char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE], char generatedCRC[2]){ // GENERATE_CRC_TEST_SIZE = 1020
 	GenerateCRC(data, pktral);
-	packet[PACKET_BYTES_TOTAL-2] = pktral[0];
-	packet[PACKET_BYTES_TOTAL-1] = pktral[1];
+	Packet[PACKET_BYTES_TOTAL-2] = pktral[0];
+	Packet[PACKET_BYTES_TOTAL-1] = pktral[1];
 
 	free(data); // Done with the data portion buffer
 
@@ -161,7 +161,7 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 	case NAK:
 		//Set "What we're waiting for" flag to ACK
 		waitForType = ACK;
-		SendData(hComm, packetToSend); // send the previous packet
+		SendData(hComm, Packet); // send the previous packet
 	break;
 		
 	//case EOT:
