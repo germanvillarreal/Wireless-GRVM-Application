@@ -30,7 +30,6 @@ BOOL bHaveFileToSend = FALSE;
 BOOL bENQToSend	= FALSE;
 BOOL bENQReceived = FALSE;
 BOOL bWantLine = FALSE;
-LPSTR	packetToSend;		/* Global packet buffer */
 
 /*-----------------------------------------------------------------------------
 -	FUNCTION:	Transmit
@@ -96,9 +95,9 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			// semaphore decrement 
 			//WaitForSingleObject(hACKWaitSemaphore, INFINITE);
 
-			Packetize(file, (sentPacketCounter - 1), packetToSend);
+			Packetize(file, (sentPacketCounter - 1));
 				
-			SendData(hComm, packetToSend); // Send data to Serial Port
+			SendData(hComm, Packet); // Send data to Serial Port
 				
 			// Set "What we're waiting for" to ACK
 			waitForType = ACK;
