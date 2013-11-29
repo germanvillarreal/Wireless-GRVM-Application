@@ -17,4 +17,5 @@ extern HANDLE hFileWaitSemaphore;
 extern HANDLE hComm;
 extern OVERLAPPED ov;
 extern BOOL bWantToRead;
+extern CHAR Packet[];
 #endif

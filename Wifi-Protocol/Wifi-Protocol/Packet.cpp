@@ -31,31 +31,36 @@
 
 #include "Packet.h"
 
-BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter, CHAR* packet)
+CHAR packet[PACKET_BYTES_TOTAL];
+
+BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 {
-	char data[PACKET_BYTES_DATA];
-	//size_t ndx;
-	size_t fileSize = strlen(bufferWithFile);
+	CHAR* data = (CHAR*)malloc(PACKET_BYTES_DATA);
 	BOOL isDone = FALSE;
-	//1020 x sentPacketCounter = startingLocation
-	int StartLoc = PACKET_BYTES_DATA * sentPacketCounter;
-	if(StartLoc * PACKET_BYTES_DATA > (int)fileSize)
+	size_t fileSize = strlen(bufferWithFile);
+	size_t StartLoc = PACKET_BYTES_DATA * sentPacketCounter; //1020 x sentPacketCounter = startingLocation
+	
+	if(StartLoc > fileSize)
 	{
 		fprintf(stderr, "%s", "Cannot seek to this location..");
-		return 0;
+		return TRUE; //WE'RE DONE.
 	}
 
-	for(size_t i = StartLoc; i < PACKET_BYTES_DATA; i++)
+	for(size_t i = StartLoc, j = 0; j < PACKET_BYTES_DATA; i++, j++)
 	{
 		if(bufferWithFile[i] == '\0' || bufferWithFile[i] == EOF)
 		{
-			data[i] = '\0';
+			data[j] = '\0';
 			isDone = TRUE;
 		}
-		data[i] = bufferWithFile[i];
+		else
+		{
+			data[j] = bufferWithFile[i];
+		}
 	}
 	
 	// Add control bytes to the packet
+	packet[0] = SYN;
 	packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
 
 	// Add data bytes to the packet
@@ -63,12 +68,13 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter, CHAR* packet)
 		packet[i+2] = data[i];
 	
 	// Add the trailer bytes to the packet (CRC)
-	
 	char pktral[2];
 	//char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE], char generatedCRC[2]){ // GENERATE_CRC_TEST_SIZE = 1020
-	GenerateCRC(packet, pktral);
-	packet[PACKET_BYTES_DATA+2] = pktral[0];
-	packet[PACKET_BYTES_DATA+3] = pktral[1];
+	GenerateCRC(data, pktral);
+	packet[PACKET_BYTES_TOTAL-2] = pktral[0];
+	packet[PACKET_BYTES_TOTAL-1] = pktral[1];
+
+	free(data); // Done with the data portion buffer
 
 	return isDone;
 }
