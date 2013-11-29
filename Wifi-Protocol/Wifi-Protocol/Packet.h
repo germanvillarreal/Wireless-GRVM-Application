@@ -15,9 +15,6 @@
 #define PACKET_BYTES_CRC	2
 #define PACKET_BYTES_TOTAL	PACKET_BYTES_CTL + PACKET_BYTES_DATA + PACKET_BYTES_CRC
 
-
-
-
 // Function Prototypes
 BOOL Packetize(CHAR*, int);
 BOOL PacketCheck(HWND, char[1024]);

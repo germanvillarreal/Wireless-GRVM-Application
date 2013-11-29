@@ -10,7 +10,7 @@
 #define EDITID   1
 #define WINDOW_HEIGHT	400
 #define WINDOW_WIDTH	600
-
+#define crc_ok  0x470F
 
 // Function Prototypes
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
