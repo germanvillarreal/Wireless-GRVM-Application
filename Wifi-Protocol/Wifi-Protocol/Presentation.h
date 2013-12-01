@@ -6,6 +6,6 @@
 #include "Vars.h"
 
 
-BOOL AddToBuffer(char[1020]);
+BOOL AddToBuffer(const char*);
 
 #endif

@@ -10,15 +10,10 @@
 #define DATA_PACKET			6000
 #define CTL_PACKET			6001
 
-#define PACKET_BYTES_CTL	2
-#define PACKET_BYTES_DATA	1020
-#define PACKET_BYTES_CRC	2
-#define PACKET_BYTES_TOTAL	PACKET_BYTES_CTL + PACKET_BYTES_DATA + PACKET_BYTES_CRC
-
 // Function Prototypes
 BOOL Packetize(CHAR*, int);
-BOOL PacketCheck(HWND, char[1024]);
-
+BOOL PacketCheck(HWND, CHAR*);
+void GetData(CHAR*, CHAR*);
 
 // vars
 extern HANDLE hWaitForLineSemaphore;

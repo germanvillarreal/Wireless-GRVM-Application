@@ -15,8 +15,6 @@
 --                  Added PacketCheck function
 --					2013/11/24
 --					Packetize parameter FILE* changed to CHAR*
---					2013/11/29 - Robin Hsieh
---					Fixed padding issues.
 --
 --  DESIGNER:       
 --
@@ -33,11 +31,13 @@
 
 #include "Packet.h"
 
+
 CHAR Packet[PACKET_BYTES_TOTAL];
 
 BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 {
 	CHAR* data = (CHAR*)malloc(PACKET_BYTES_DATA);
+	data[1024] = '\0';
 
 	BOOL isDone = FALSE;
 	size_t fileSize = strlen(bufferWithFile);
@@ -55,10 +55,10 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 
 	for(size_t i = StartLoc, j = 0; j < PACKET_BYTES_DATA; i++, j++)
 	{
-
+		
 		if((bufferWithFile[i] == EOF || bufferWithFile[i] == '\0'))
-			//if(bufferWithFile[i] == '\0' || bufferWithFile[i] == EOF)
-				//if(bufferWithFile[i] == '\0')
+		//if(bufferWithFile[i] == '\0' || bufferWithFile[i] == EOF)
+		//if(bufferWithFile[i] == '\0')
 		{
 			data[j] = 'W';
 			//data[j] = '\0';
@@ -71,7 +71,7 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 		}
 	}
 
-
+	
 	// Add control bytes to the packet
 	Packet[0] = SYN;
 	Packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
@@ -79,7 +79,7 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 	// Add data bytes to the packet
 	for(size_t i = 0; i < PACKET_BYTES_DATA; i++)
 		Packet[i+2] = data[i];
-
+	
 	// Add the trailer bytes to the packet (CRC)
 	char pktral[2];
 	//char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE], char generatedCRC[2]){ // GENERATE_CRC_TEST_SIZE = 1020
@@ -87,46 +87,51 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 	Packet[PACKET_BYTES_TOTAL-2] = pktral[0];
 	Packet[PACKET_BYTES_TOTAL-1] = pktral[1];
 
-
+//	free(data); // Done with the data portion buffer
 	char test = data[500];
 	char test2 = data[800];
-	free(data); // Done with the data portion buffer
+
 	return isDone;
 }
 
-BOOL PacketCheck(HWND hwnd, char packet[1024])
+BOOL PacketCheck(HWND hwnd, CHAR* packet)
 {
-	char p2[1020];
-	// Make sure we're getting our own packets, not some other packet
-	//switch (packet[0])
-	//{
-	//case SYN:
-	//	break;
-	//default: // discard packet
-	//	return FALSE;
-	//}
+	
+	//char data[1020];
+	char* data = (CHAR*) malloc(1020);
+	data[1020] = '\0';
+	int lengthOfData = strlen(data);
+	
+	 //Make sure we're getting our own packets, not some other packet
+	switch (packet[0])
+	{
+	case SYN:
+		break;
+	default: // discard packet
+		return FALSE;
+	}
 
-	//HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	switch (packet[1])
 	{
-		//case ENQ:
-		//	bENQReceived = TRUE;
-		//	SendControl(hComm, ACK);
-		//	//Set "what we're waiting for" flag to DC1
-		//	waitForType = DC1;
-		//break;
-		//case ACK:
-		//	// check if we wanted an ACK
-		//	if (waitForType == ACK)
-		//	{
-		//		// check if we're actually bidding for the line
-		//		if (bWantLine)
-		//			ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
-		//		else
-		//		// check if we're sending a file
-		//			ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
-		//	}
-		//break;
+	case ENQ:
+		bENQReceived = TRUE;
+		SendControl(hComm, ACK);
+	//	Set "what we're waiting for" flag to DC1
+		waitForType = DC1;
+	break;
+	case ACK:
+		// check if we wanted an ACK
+		if (waitForType == ACK)
+		{
+			// check if we're actually bidding for the line
+			if (bWantLine)
+				ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
+			else
+			// check if we're sending a file
+				ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);
+		}
+	break;
 
 	case DC1:
 		//if we're waiting for a DC2 packet
@@ -136,18 +141,17 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 			SendControl(hComm, NAK);
 			break;
 		}
-
+	
 		SendControl(hComm, ACK);
 		//add to buffer
+		
+		GetData(packet, data);
+		AddToBuffer(data);
 
-		for(size_t i = 2; i < 1022; i++)
-			p2[i - 2] = packet[i];
-		AddToBuffer(p2);
-
-		DisplayText(hwnd, displayBuffer);
-		break;
-
-
+		//DisplayText(hwnd, displayBuffer);
+	break;
+	
+			
 	case DC2:
 		// if we're waiting for a DC1 packet
 		if (waitForType == DC1 || !ErrorCheck(packet+2))
@@ -159,29 +163,48 @@ BOOL PacketCheck(HWND hwnd, char packet[1024])
 		SendControl(hComm, ACK);
 
 		//add to buffer
-		for(size_t i = 2; i < 1022; i++)
-			p2[i - 2] = packet[i];
-		AddToBuffer(p2);
+		GetData(packet, data);
+		AddToBuffer(data);
 
-		DisplayText(hwnd, displayBuffer);
-		break;
+		//DisplayText(hwnd, displayBuffer);
+	break;
 
 	case NAK:
 		//Set "What we're waiting for" flag to ACK
 		waitForType = ACK;
 		SendData(hComm, Packet); // send the previous packet
-		break;
-
-		//case EOT:
-		//	bENQReceived = FALSE;
-		//	if (bENQToSend)
-		//	{
-		//		ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
-		//		break;
-		//	}
-		//	// GO back to IDLE state
-		//	waitForType = ENQ;
-		//break;
-	}
+	break;
+		
+	case EOT:
+		bENQReceived = FALSE;
+		if (bENQToSend)
+		{
+			ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);
+			break;
+		}
+	    // GO back to IDLE state
+		waitForType = ENQ;
+	break;
+    }
 	return TRUE;
+}
+
+void GetData(CHAR* packet, CHAR* dataOut)
+{
+	//size_t d = 0, p = 2;
+	size_t d = 0, p = 2;
+	int sizeOfDataOut = strlen(dataOut);
+	int sizeOfpacket = strlen(packet);
+	//while (packet[p] != '\0' ||
+	//	p < PACKET_BYTES_TOTAL - PACKET_BYTES_CRC) 
+
+//	while (packet[p] != '\0' ||
+//		p < 1022) 
+
+	while (p < 1022) 
+	{
+		if (p == 1020)
+			int df = 0;
+		dataOut[d++] = packet[p++];
+	}
 }

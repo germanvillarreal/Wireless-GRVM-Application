@@ -49,7 +49,7 @@ OVERLAPPED ov = {0};
 -	NOTES:	The physical function to read from the serial port
 -
 -----------------------------------------------------------------------------*/
-BOOL ReadSerialPort(HANDLE hComm, char packetBuffer[1024], DWORD dwBytesToRead,
+BOOL ReadSerialPort(HANDLE hComm, char* packetBuffer, DWORD dwBytesToRead,
 					LPDWORD lpdwBytesRead)
 {
 	if (!ReadFile(hComm, packetBuffer, dwBytesToRead, lpdwBytesRead, &ov))
@@ -119,10 +119,10 @@ BOOL SendControl(HANDLE hComm, int controlType)
 -			already be filled in.
 -
 -----------------------------------------------------------------------------*/
-BOOL SendData(HANDLE hComm, char packetToSend[1024])
+BOOL SendData(HANDLE hComm, char* packetToSend)
 {
 	DWORD dwBytesSent;
-
+	//if (!WriteFile(hComm, packetToSend, strlen(packetToSend), &dwBytesSent, &ov))
 	if (!WriteFile(hComm, packetToSend, PACKET_BYTES_TOTAL, &dwBytesSent, &ov))
 		return FALSE;
 	return TRUE;

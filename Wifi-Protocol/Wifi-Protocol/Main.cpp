@@ -537,7 +537,7 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 				{
 					
 					//Testing of the ErrorCheck function by passing in the data
-					BOOL errchk = ErrorCheck((char*)pszFileText);
+					//BOOL errchk = ErrorCheck((char*)pszFileText);
 					
 					
 					// Clean up thread
@@ -570,7 +570,7 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
 				if (ConfPort(&MainWindow, lpszCommName)){
 					// Set Read flag true
 					bWantToRead		= TRUE;
-					hReceiveThread	= CreateThread(NULL, 0, ReceiveThread, &MainWindow, 0, &dwReceiveThreadID);
+					hReceiveThread	= CreateThread(NULL, 0, ReceiveThread, &hEdit, 0, &dwReceiveThreadID);
 					break;
 				}
 			}
@@ -837,8 +837,11 @@ BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
 -- This function displays the formatted text.
 ------------------------------------------------------------------------------------------------------------------*/
 void DisplayText(HWND hEdit, LPCSTR text){
-
-	SetWindowText(hEdit, text);
+	
+	if(!SetWindowText(hEdit, text)){
+		MessageBox(NULL, NULL, TEXT("TEST"), 0);
+	}
+	
 	/*HDC hdc;
 	RECT drawingArea;
 	

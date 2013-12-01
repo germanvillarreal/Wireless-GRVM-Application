@@ -115,11 +115,11 @@ BOOL ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 	}
 	else
 	{
-		comTimeout.ReadIntervalTimeout			= 200;
-		comTimeout.ReadTotalTimeoutConstant     = 200;
-		comTimeout.ReadTotalTimeoutMultiplier   = 200;
-		comTimeout.WriteTotalTimeoutConstant    = 200;
-		comTimeout.WriteTotalTimeoutMultiplier	= 200;
+		comTimeout.ReadIntervalTimeout			= MAXDWORD;
+		comTimeout.ReadTotalTimeoutConstant     = 0;
+		comTimeout.ReadTotalTimeoutMultiplier   = 0;
+		comTimeout.WriteTotalTimeoutConstant    = 0;
+		comTimeout.WriteTotalTimeoutMultiplier	= 0;
 	}
 	if (!SetCommTimeouts(hComm, &comTimeout))
 	{
