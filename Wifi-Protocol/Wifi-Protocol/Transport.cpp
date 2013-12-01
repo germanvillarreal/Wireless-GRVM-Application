@@ -88,7 +88,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 		//// Wait for ACK
 		waitForType = ACK;
 		bWantLine = TRUE;
-		dwenqTimeout = WaitForSingleObject(hWaitForLineSemaphore, 357);
+		dwenqTimeout = WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
 		if(dwenqTimeout == WAIT_OBJECT_0)
 		{
 			bWantLine = FALSE;
@@ -96,23 +96,27 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			while (++sentPacketCounter % 6 != 0) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 			{	
 				
-				if(WaitForSingleObject(hACKWaitSemaphore, 200) == WAIT_TIMEOUT)
-				{
-					sentPacketCounter--;
-				}
+				//if(WaitForSingleObject(hACKWaitSemaphore, INFINITE) == WAIT_TIMEOUT)
+				//{
+				//	sentPacketCounter--;
+				//}
 
+				//if(WaitForSingleObject(hACKWaitSemaphore, INFINITE) == WAIT_OBJECT_0)				
+				//{
+					//bDoneSending = Packetize(file, (sentpacketcounter));
+					bDoneSending = Packetize(file, (sentPacketCounter - 1));	
+					// set "what we're waiting for" to ack
+					waitForType = ACK;
+					//Sleep(5000);
+					SendData(hComm, Packet); // send data to serial port
+					//Sleep(5000);	
+					
+				//}
+				//else
+				//{
+				//	sentPacketCounter--;
+				//}
 				
-				//bDoneSending = Packetize(file, (sentpacketcounter));
-				bDoneSending = Packetize(file, (sentPacketCounter - 1));	
-				Sleep(5000);
-				SendData(hComm, Packet); // send data to serial port
-				Sleep(5000);	
-				
-				// set "what we're waiting for" to ack
-				waitForType = ACK;
-
-
-				//sentPacketCounter++;
 			}
 			SendControl(hComm, EOT);
 			 //another semaphore to determine when to start again.
@@ -192,7 +196,9 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 			break;
 		}
 		handletoTwoEvents[1] = ov.hEvent;
-		dwWaitValue = WaitForMultipleObjects(2, handletoTwoEvents, FALSE, INFINITE);
+		//dwWaitValue = WaitForMultipleObjects(2, handletoTwoEvents, FALSE, INFINITE);
+
+		dwWaitValue = WaitForSingleObject(ov.hEvent,INFINITE);
 		ClearCommError(hComm, &dwError, cs);
 		switch ( dwWaitValue )
 		{
@@ -203,12 +209,13 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				TerminateThread(handletoTwoEvents[0], 0);
 				MessageBox(NULL, TEXT("WHY????"), NULL, NULL);
 			break;*/
-			case WAIT_OBJECT_0 + 1:
+			//case WAIT_OBJECT_0 + 1:
+			case WAIT_OBJECT_0:
 				do
 				{
 					ResetEvent(ov.hEvent);
 					nBytesRead = 0;
-					if( (cs->cbInQue % 1024 == 0) && ReadSerialPort(hComm, packetBuffer, cs->cbInQue, &nBytesRead) 
+					if( (cs->cbInQue >= 1024) && ReadSerialPort(hComm, packetBuffer, 1024, &nBytesRead) 
 						&& (nBytesRead != 0) )
 					{
 						// DC1/Dc2
@@ -226,6 +233,10 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 						// ENQ/ACK/NAK/EOT
 						//MessageBox(NULL, TEXT("2 bytes"), NULL, MB_OK);
 					}
+					else
+					{
+						PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
+					}
 					
 						//send to packet check
 					/*for (int q = 0; q < 1024; q++)
@@ -239,7 +250,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 				} while (nBytesRead > 0);
 				// endif "signaled"
 				
-				if(!isEmpty(my_cb)){
+				/*if(!isEmpty(my_cb)){
 					while (my_cb->first < 1024)
 					{	
 					
@@ -248,7 +259,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 							}
 					
 					}
-				}
+				}*/
 				int random = 0;
 				//AddToBuffer(packetBuffer);
 			
