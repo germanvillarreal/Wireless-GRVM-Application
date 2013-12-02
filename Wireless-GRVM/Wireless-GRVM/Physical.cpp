@@ -76,7 +76,7 @@ BOOL ReadSerialPortControl(HANDLE hComm, char packetBuffer[2], DWORD dwBytesToRe
 		return FALSE;
 	}
 	//MessageBox(NULL, TEXT("error ReadSerialPortControl More than 2 bytes read"), NULL, NULL);
-	PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
+	//PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
 	return TRUE;
 }
 
@@ -91,7 +91,7 @@ BOOL ReadSerialPortData(HANDLE hComm, char* packetBuffer, DWORD dwBytesToRead,
 		PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
 		return FALSE;
 	}
-	PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
+	//PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
 	return TRUE;
 }
 

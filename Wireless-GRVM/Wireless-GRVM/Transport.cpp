@@ -258,9 +258,9 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 					{
 						packetBufferControl[2] = '\0';
 						PacketCheckControl(*(HWND*)lphwnd, packetBufferControl);
-						nBytesRead = 0;
+						//nBytesRead = 0;
 					}
-					
+					ClearCommError(hComm, &dwError, cs);
 					dwWait = cs->cbInQue;
 				} while (nBytesRead == 0);
 				// endif "signaled"
