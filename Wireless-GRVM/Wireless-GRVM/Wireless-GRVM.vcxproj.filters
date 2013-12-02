@@ -41,9 +41,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Presentation.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="CircularBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Presentation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

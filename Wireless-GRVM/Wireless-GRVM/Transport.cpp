@@ -97,7 +97,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 		//{
 			bWantLine = FALSE;
 		
-			while (++sentPacketCounter % 6 != 0) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
+			while (++sentPacketCounter % 6 != 0 && !bDoneSending) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 			{	
 				
 				//MessageBox(NULL, TEXT("Packeting Data before Sending"), NULL, NULL);
