@@ -193,7 +193,7 @@ BOOL ErrorCheck(char pkt[PACKET_BYTES_DATA + PACKET_BYTES_CRC]){ // ERROR_CHECK_
 		printf("TRUE\t");
 		return TRUE;
 	}
-
+	MessageBox(NULL, TEXT("ErrorCheck Fail"), NULL, NULL);
 	return FALSE;
 }
 

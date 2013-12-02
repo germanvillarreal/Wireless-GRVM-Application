@@ -76,6 +76,9 @@ DWORD WINAPI TransmitThread(LPVOID param)
 	sentPacketCounter = 0;
 	bHaveFileToSend = TRUE;
 	LONG_PTR bytesSent;
+	int count = 1;
+	int c = rand() % 100 + 1;
+	Sleep(c);
 	do
 	{
 		// Send ENQ - for getting the right-of-way to send
@@ -113,17 +116,28 @@ DWORD WINAPI TransmitThread(LPVOID param)
 					 }
 					}
 					 DWORD hACKWaitstuff = 0;
-					while(1)
+					while(count < 6)
 					{
-						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, INFINITE);
+						
+						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, 3000);
 						if( hACKWaitstuff == WAIT_OBJECT_0){
+							count = 0;
+							bDoneSending = FALSE;
 							break;
 						}
+						//PurgeComm(hComm, PURGE_TXCLEAR|PURGE_RXCLEAR);
+						SendData(hComm, Packet);
+						bDoneSending = TRUE;
+						count++;
+						MessageBox(NULL, TEXT("COUNT"), NULL, NULL);
+
 					}
 					
 			}
+			count = 0;
 			SendControl(hComm, EOT);
 			 //another semaphore to determine when to start again.
+			
 			Sleep(1000);
 			//WaitForSingleObject(hFileWaitSemaphore, INFINITE);
 		//} 
@@ -219,6 +233,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 					nBytesRead = 0;
 					if( (cs->cbInQue >= 1024) && ReadSerialPortData(hComm, packetBuffer, cs->cbInQue, &nBytesRead) && (nBytesRead !=0))
 					{
+						
 						packetBuffer[1024] = '\0';
 						PacketCheck(*(HWND*)lphwnd, packetBuffer);
 						//nBytesRead = 0;

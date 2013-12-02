@@ -26,6 +26,7 @@ extern BOOL bENQToSend;
 extern BOOL bENQReceived;
 extern BOOL bWantLine;
 extern BOOL bWantToSendACK;
+extern BOOL bHaveFileToSend;
 extern LPSTR displayBuffer;
 
 #endif
