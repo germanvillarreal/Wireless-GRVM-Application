@@ -78,7 +78,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 	bHaveFileToSend = TRUE;
 	LONG_PTR bytesSent;
 	int count = 1;
-	int c = rand() % 100 + 1;
+	int c = rand() % 100 + 1 * 2.37;
 	Sleep(c);
 	do
 	{
