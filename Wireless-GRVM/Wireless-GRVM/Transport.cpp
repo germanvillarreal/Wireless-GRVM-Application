@@ -33,6 +33,7 @@ BOOL bENQToSend	= FALSE;
 BOOL bENQReceived = FALSE;
 BOOL bWantLine = FALSE;
 BOOL bWantToSendACK = FALSE;
+BOOL bWantToResendData = FALSE;
 
 /*-----------------------------------------------------------------------------
 -	FUNCTION:	Transmit
@@ -104,7 +105,9 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			{	
 				
 				//MessageBox(NULL, TEXT("Packeting Data before Sending"), NULL, NULL);
+				
 					bDoneSending = Packetize(file, (sentPacketCounter - 1));	
+				
 					// set "what we're waiting for" to ack
 					waitForType = ACK;
 					//Sleep(10000);
@@ -119,14 +122,25 @@ DWORD WINAPI TransmitThread(LPVOID param)
 					while(count < 6)
 					{
 						
-						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, 3000);
+						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, 2500);
 						if( hACKWaitstuff == WAIT_OBJECT_0){
 							count = 0;
 							bDoneSending = FALSE;
+							bWantToResendData = FALSE;
 							break;
 						}
+						if( hACKWaitstuff == WAIT_TIMEOUT)
+						{
+							PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR);
+							SendData(hComm, Packet);
+							MessageBox(NULL, TEXT("bWantToResendData is true"), NULL, NULL);
+							//bWantToResendData = TRUE;
+						}
 						//PurgeComm(hComm, PURGE_TXCLEAR|PURGE_RXCLEAR);
-						SendData(hComm, Packet);
+						/*if(bWantToResendData){
+							MessageBox(NULL, TEXT("bWantToResendData is true"), NULL, NULL);
+							
+						}*/
 						bDoneSending = TRUE;
 						count++;
 						MessageBox(NULL, TEXT("COUNT"), NULL, NULL);
@@ -229,6 +243,7 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 			case WAIT_OBJECT_0+1:
 				do 
 				{
+					ClearCommError(hComm, &dwError, cs);
 					ResetEvent(handletoTwoEvents[1]);
 					nBytesRead = 0;
 					if( (cs->cbInQue >= 1024) && ReadSerialPortData(hComm, packetBuffer, cs->cbInQue, &nBytesRead) && (nBytesRead !=0))
@@ -245,9 +260,9 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 						PacketCheckControl(*(HWND*)lphwnd, packetBufferControl);
 						nBytesRead = 0;
 					}
-					ClearCommError(hComm, &dwError, cs);
+					
 					dwWait = cs->cbInQue;
-				} while (nBytesRead > 0);
+				} while (nBytesRead == 0);
 				// endif "signaled"
 				DisplayText(*(HWND*)lphwnd, displayBuffer);
 		}
