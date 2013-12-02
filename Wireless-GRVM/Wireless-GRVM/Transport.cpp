@@ -122,7 +122,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 					while(count < 6)
 					{
 						
-						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, 2500);
+						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, 10000);
 						if( hACKWaitstuff == WAIT_OBJECT_0){
 							count = 0;
 							bDoneSending = FALSE;
@@ -133,7 +133,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 						{
 							PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR);
 							SendData(hComm, Packet);
-							MessageBox(NULL, TEXT("bWantToResendData is true"), NULL, NULL);
+							//MessageBox(NULL, TEXT("bWantToResendData is true"), NULL, NULL);
 							//bWantToResendData = TRUE;
 						}
 						//PurgeComm(hComm, PURGE_TXCLEAR|PURGE_RXCLEAR);
@@ -143,7 +143,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 						}*/
 						bDoneSending = TRUE;
 						count++;
-						MessageBox(NULL, TEXT("COUNT"), NULL, NULL);
+						//MessageBox(NULL, TEXT("COUNT"), NULL, NULL);
 
 					}
 					
