@@ -436,7 +436,7 @@ void Window_OnVScroll(HWND hwnd, HWND hwndCtl, UINT code, int pos){
 ------------------------------------------------------------------------------------------------------------------*/
 BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 	HWND hStatus, hTool;
-	int statwidths[] = {100, -1};
+	int statwidths[] = {100, 100,  -1};
 	TBBUTTON tbb[3];
 	TBADDBITMAP tbab;
 
@@ -474,12 +474,13 @@ BOOL Window_OnCreate(HWND hwnd, LPCREATESTRUCT strct){
 	if(hEdit == NULL){
 		MessageBox(hwnd, "Could not create edit box.", "Error", MB_OK | MB_ICONERROR);
 	}
-	//SendMessage(hTool, TB_ADDBUTTONS, sizeof(tbb)/sizeof(TBBUTTON), (LPARAM)&tbb);
 	hStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0, hwnd, (HMENU)IDC_MAIN_STATUS, GetModuleHandle(NULL), NULL);
  
 	SendMessage(hStatus, SB_SETPARTS, sizeof(statwidths)/sizeof(int), (LPARAM)statwidths);
 	SendMessage(hStatus, SB_SETTEXT, 0, (LPARAM)"Test");
- 
+	SendMessage(hStatus, SB_SETTEXT, 1, (LPARAM)"Status");
+	SendMessage(hStatus, SB_SETTEXT, 2, (LPARAM)"word");
+	
 	if(hStatus == NULL){
 		MessageBox(hwnd, "Could not create StatusBar.", "Error", MB_OK | MB_ICONERROR);
 	}
@@ -535,11 +536,6 @@ void Window_OnCommand (HWND hwnd, int id, HWND hwndCtl, UINT codeNotify){
                 }
 				else // success file read
 				{
-					
-					//Testing of the ErrorCheck function by passing in the data
-					//BOOL errchk = ErrorCheck((char*)pszFileText);
-					
-					
 					// Clean up thread
 					TerminateThread(hTransmitThread, 0);
 					CloseHandle(hTransmitThread);
@@ -805,14 +801,10 @@ BOOL FileRead(HWND hwnd, const LPCSTR pstrFileName){
 					bSuccess = TRUE;
 					
                 }
-               //free(pszFileText); //not sure if this is needed here or not as i think this frees the memory (i.e. the stuff we read)
             }
         }
        CloseHandle(hFile);
     }
-	//DISPLAY TEXT (THIS WILL NEED TO GO IN DISPLAY FUNCTION AFTER READING A FILE
-	//DisplayText(hEdit, pszFileText);
-	
     return bSuccess;
 }
 
@@ -894,14 +886,6 @@ BOOL FileSave(HWND hwnd, LPCTSTR pstrFileName){
 				DWORD dwWritten;
 				if(WriteFile(hFile, pszFileText, dwTextLength, &dwWritten, NULL))
                         bSuccess = TRUE;
-
-                /*if(GetWindowText(hwnd, pszText, dwBufferSize))
-                {
-                    DWORD dwWritten;
-
-                    if(WriteFile(hFile, pszText, dwTextLength, &dwWritten, NULL))
-                        bSuccess = TRUE;
-                }*/
                 GlobalFree(pszText);
             }
         }

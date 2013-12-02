@@ -33,11 +33,40 @@
 
 
 CHAR Packet[PACKET_BYTES_TOTAL];
-
+/*-----------------------------------------------------------------------------
+-	FUNCTION:	Packetize
+-
+-	DATE:		November 21st, 2013
+-
+-	REVISIONS:	
+-	2013/11/25 - Vincent - Semaphore for blocking when hitting maximum packets sent
+-	2013/11/26 - Vincent - Added line bidding
+-   2013/11/27 - Vincent/German - Modified line bidding solve issues with simultaneous file sending
+-								- Modified Packetize/sentPacketCounter call order
+-								- Added basic timeout for end of 5 packet transmission
+-								- Added line rebidding
+-
+-	DESIGNER:	Vincent Lau
+-
+-	PROGRAMMER:	Vincent Lau
+-				German Villarreal
+-
+-	INTERFACE:	DWORD WINAPI TransmitThread(LPVOID param)
+-		
+-	RETURNS:	void, nothing.
+-				
+-	PARAMETERS:	LPVOID param - a dynamic char buffer that contains the whole file
+-							we are trying to send over the serial port.
+-
+-	NOTES:	This is the function that contains the logic for transmitting data
+-			and following those rules for doing so, such as the upper send limit
+-			per round (5 packets per round in the (BE CREATIVE) Protocol).
+-			It will stop when it has sent one packet out and wait for a response.
+-			
+-
+-----------------------------------------------------------------------------*/
 BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 {
-	//CHAR* data = (CHAR*)malloc(PACKET_BYTES_DATA);
-	//data[1024] = '\0';
 	char data[1024];
 	BOOL isDone = FALSE;
 	size_t fileSize = strlen(bufferWithFile);
@@ -48,19 +77,13 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 		fprintf(stderr, "%s", "Cannot seek to this location..");
 		return TRUE; //WE'RE DONE.
 	}
-
 	for (size_t n = 0; n < PACKET_BYTES_TOTAL; n++)
 		Packet[n] = ' ';
-
-
 	for(size_t i = StartLoc, j = 0; j < PACKET_BYTES_DATA; i++, j++)
 	{
 		
 		if((bufferWithFile[i] == EOF || bufferWithFile[i] == '\0'))
-		//if(bufferWithFile[i] == '\0' || bufferWithFile[i] == EOF)
-		//if(bufferWithFile[i] == '\0')
 		{
-			//data[j] = 'W';
 			data[j] = '\0';
 			isDone = TRUE;
 			i--;
@@ -70,8 +93,6 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 			data[j] = bufferWithFile[i];
 		}
 	}
-
-	
 	// Add control bytes to the packet
 	Packet[0] = SYN;
 	Packet[1] = (sentPacketCounter % 2 == 0) ? DC1 : DC2;
@@ -82,7 +103,6 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 	
 	// Add the trailer bytes to the packet (CRC)
 	char pktral[2];
-	//char* GenerateCRC(char pkt[GENERATE_CRC_TEST_SIZE], char generatedCRC[2]){ // GENERATE_CRC_TEST_SIZE = 1020
 	GenerateCRC(data, pktral);
 	Packet[PACKET_BYTES_TOTAL-2] = pktral[0];
 	Packet[PACKET_BYTES_TOTAL-1] = pktral[1];
@@ -93,7 +113,31 @@ BOOL Packetize(CHAR* bufferWithFile, int sentPacketCounter)
 
 	return isDone;
 }
-
+/*-----------------------------------------------------------------------------
+-	FUNCTION:	PacketCheck
+-
+-	DATE:		November 21st, 2013
+-
+-	REVISIONS:	
+-	2013/12/02 - Vincent - Created
+-	
+-
+-	DESIGNER:	Vincent Lau
+-
+-	PROGRAMMER:	Vincent Lau
+-				German Villarreal
+-
+-	INTERFACE:	BOOL PacketCheck(HWND hwnd, CHAR* packet)
+-		
+-	RETURNS:	void, nothing.
+-				
+-	PARAMETERS:	HWND hwnd - a dynamic char buffer that contains the whole file
+-				CHAR* packet:  1024 bytes of data
+-
+-	NOTES:	This is a function that cecks the packet for data.
+-			
+-
+-----------------------------------------------------------------------------*/
 BOOL PacketCheck(HWND hwnd, CHAR* packet)
 {
 	char* data = (CHAR*) malloc(1020);
@@ -177,8 +221,6 @@ BOOL PacketCheck(HWND hwnd, CHAR* packet)
 
 BOOL PacketCheckControl(HWND hwnd, CHAR packet[2])
 {
-	
-	//MessageBox(NULL, TEXT("PacketCheckControl Error"), NULL, NULL);
 	 //Make sure we're getting our own packets, not some other packet
 	switch (packet[0])
 	{
@@ -188,30 +230,24 @@ BOOL PacketCheckControl(HWND hwnd, CHAR packet[2])
 		return FALSE;
 	}
 
-//HAD TO COMMENT THIS OUT TO TEST COMPILE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	switch (packet[1])
 	{
 	case ENQ:
 		bENQReceived = TRUE;
-		//SendControl(hComm, ACK);
 		bWantToSendACK = TRUE;
 		//	Set "what we're waiting for" flag to DC1
 		waitForType = DC1;
 	break;
 	case ACK:
 		// check if we wanted an ACK
-		//MessageBox(NULL, TEXT("Got An ACK"), NULL, NULL);
 		if (waitForType == ACK)
 		{
 			// check if we're actually bidding for the line
 			if (bWantLine){
-				//MessageBox(NULL, TEXT("ReleaseSemaphoreACK BWANTLINE FALSE"), NULL, NULL);
 				ReleaseSemaphore(hWaitForLineSemaphore, 1, NULL);}
 			else{
 			// check if we're sending a file
-			//MessageBox(NULL, TEXT("ReleaseSemaphoreACK BWANTLINE FALSE"), NULL, NULL);
 			ReleaseSemaphore(hACKWaitSemaphore, 1, NULL);}
-			//MessageBox(NULL, TEXT("ThreadReleaseSemaphoreACK BWANTLINE FALSE"), NULL, NULL);
 		}
 	break;
 	case NAK:
@@ -234,18 +270,35 @@ BOOL PacketCheckControl(HWND hwnd, CHAR packet[2])
 	//MessageBox(NULL, TEXT("Unable to return True of PacketCheck "), NULL, NULL);
 	return TRUE;
 }
-
+/*-----------------------------------------------------------------------------
+-	FUNCTION:	GetData
+-
+-	DATE:		November 21st, 2013
+-
+-	REVISIONS:	
+-	2013/12/02 - German Villarreal - Created
+-	
+-
+-	DESIGNER:	Robin Hsieh
+-
+-	PROGRAMMER:	German Villarreal
+-
+-	INTERFACE:	void GetData(CHAR* packet, CHAR* dataOut)
+-		
+-	RETURNS:	void, nothing.
+-				
+-	PARAMETERS:	CHAR* packet - 1024 of data
+-				CHAR* dataOut:  1020 bytes of data
+-
+-	NOTES:	This is a function shaves off the control from the packet
+-
+-----------------------------------------------------------------------------*/
 void GetData(CHAR* packet, CHAR* dataOut)
 {
 	//size_t d = 0, p = 2;
 	size_t d = 0, p = 2;
 	int sizeOfDataOut = strlen(dataOut);
 	int sizeOfpacket = strlen(packet);
-	//while (packet[p] != '\0' ||
-	//	p < PACKET_BYTES_TOTAL - PACKET_BYTES_CRC) 
-
-//	while (packet[p] != '\0' ||
-//		p < 1022) 
 
 	while (p < 1022) 
 	{

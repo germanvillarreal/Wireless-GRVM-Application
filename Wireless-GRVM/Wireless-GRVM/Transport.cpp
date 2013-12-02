@@ -96,23 +96,14 @@ DWORD WINAPI TransmitThread(LPVOID param)
 		bWantLine = TRUE;
 		//Sleep(5000);
 		WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
-		//dwenqTimeout = WaitForSingleObject(hWaitForLineSemaphore, INFINITE);
-		//if(dwenqTimeout == WAIT_OBJECT_0)
-		//{
-			bWantLine = FALSE;
+		bWantLine = FALSE;
 		
 			while (++sentPacketCounter % 6 != 0 && !bDoneSending) // ++ mod 6 allows sending of 5 packets, ++ mod 5 allows 4
 			{	
-				
-				//MessageBox(NULL, TEXT("Packeting Data before Sending"), NULL, NULL);
-				
 					bDoneSending = Packetize(file, (sentPacketCounter - 1));	
-				
 					// set "what we're waiting for" to ack
 					waitForType = ACK;
-					//Sleep(10000);
 					 bytesSent = 0;
-					//SendData(hComm, Packet); // send data to serial port
 					 while(1){
 						if(SendData(hComm, Packet)) {
 							break;
@@ -133,18 +124,9 @@ DWORD WINAPI TransmitThread(LPVOID param)
 						{
 							PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR);
 							SendData(hComm, Packet);
-							//MessageBox(NULL, TEXT("bWantToResendData is true"), NULL, NULL);
-							//bWantToResendData = TRUE;
 						}
-						//PurgeComm(hComm, PURGE_TXCLEAR|PURGE_RXCLEAR);
-						/*if(bWantToResendData){
-							MessageBox(NULL, TEXT("bWantToResendData is true"), NULL, NULL);
-							
-						}*/
 						bDoneSending = TRUE;
 						count++;
-						//MessageBox(NULL, TEXT("COUNT"), NULL, NULL);
-
 					}
 					
 			}
@@ -153,8 +135,6 @@ DWORD WINAPI TransmitThread(LPVOID param)
 			 //another semaphore to determine when to start again.
 			
 			Sleep(1000);
-			//WaitForSingleObject(hFileWaitSemaphore, INFINITE);
-		//} 
 		// DONE SENDING
 		bENQToSend = FALSE;
 	} while(!bDoneSending); //file not done
@@ -171,6 +151,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 -	2013/11/24 - Vincent - Overlapped i/o 
 -	2013/11/25 - Vincent - Semaphore for releasing file sending block, when we've received 5 packets 
 -							(other person hit their maximum)
+-	2013/11/29 - Mat	- Fixed the check for the cs.cbInQue
 -
 -	DESIGNER:	Vincent Lau
 -
@@ -227,7 +208,6 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 			break;
 		}
 		handletoTwoEvents[1] = ov.hEvent;
-		//dwWaitValue = WaitForMultipleObjects(2, handletoTwoEvents, FALSE, INFINITE);
 
 		if (bWantToSendACK)
 		{
@@ -235,7 +215,6 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 			bWantToSendACK = FALSE;
 		}
 
-		//dwWaitValue = WaitForSingleObject(ov.hEvent,INFINITE);
 		dwWaitValue = WaitForMultipleObjects(2, handletoTwoEvents, FALSE, INFINITE);
 		ClearCommError(hComm, &dwError, cs);
 		switch ( dwWaitValue )
@@ -272,40 +251,3 @@ DWORD WINAPI ReceiveThread(LPVOID lphwnd)
 	ExitThread(EXIT_SUCCESS);
 	
 }
-
-/*
-if( (cs->cbInQue >= 1024) )
-					{
-						//MessageBox(NULL, TEXT("error (cs->cbInQue >= 1024) BEFORE READ"), NULL, NULL);
-						//if( ReadSerialPort(hComm, packetBuffer, 1024, &nBytesRead) && (nBytesRead != 0) )
-						if(ReadSerialPortData(hComm, packetBuffer, cs->cbInQue, &nBytesRead))
-						{
-
-						// DC1/Dc2
-						//PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
-						packetBuffer[1024] = '\0';
-						PacketCheck(*(HWND*)lphwnd, packetBuffer);
-						//MessageBox(NULL, TEXT("error (cs->cbInQue >= 1024) AFTER"), NULL, NULL);
-						//for(int i = 0; i < cs->cbInQue; i++)
-						//{
-						//	writeBuffer(my_cb, packetBuffer[i]);
-						//	
-						//}
-						}
-					}
-					else if (cs->cbInQue == 2)
-					{
-						//MessageBox(NULL, TEXT("error (cs->cbInQue == 2)) BEFORE READ"), NULL, NULL);
-						//if(ReadSerialPort(hComm, packetBuffer, cs->cbInQue, &nBytesRead))
-						if(ReadSerialPortControl(hComm, packetBufferControl, cs->cbInQue, &nBytesRead))
-						{
-						//PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
-						//MessageBox(NULL, TEXT("error Before PacketCheckControlChar "), NULL, NULL);
-						packetBufferControl[2] = '\0';
-						//Sleep(3000);
-						PacketCheckControl(*(HWND*)lphwnd, packetBufferControl);
-						//MessageBox(NULL, TEXT("error After PacketCheckControlChar "), NULL, NULL);
-						nBytesRead = 0;
-						
-						}
-					}*/

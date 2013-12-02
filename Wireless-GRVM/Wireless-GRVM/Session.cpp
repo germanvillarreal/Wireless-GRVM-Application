@@ -101,32 +101,6 @@ BOOL ConfPort (HWND* lphwnd, LPTSTR lpszOpenedPort)
 	// Allow user to change settings from this config dialog
 	if (!CommConfigDialog (lpszOpenedPort, *lphwnd, &cc))
 		return FALSE;
-
-	/*if (!SetCommState(hComm, &cc.dcb))
-	{
-		MessageBox (*lphwnd,TEXT("Couldn't set comm state"),TEXT(""), MB_OK);
-		return false;
-	}*/
-	/*
-	if(!GetCommTimeouts(hComm, &comTimeout))
-	{
-		MessageBox (*lphwnd,TEXT("Couldn't get timeouts"),TEXT(""), MB_OK);
-		return FALSE;
-	}
-	else
-	{
-		comTimeout.ReadIntervalTimeout			= MAXDWORD;
-		comTimeout.ReadTotalTimeoutConstant     = 0;
-		comTimeout.ReadTotalTimeoutMultiplier   = 0;
-		comTimeout.WriteTotalTimeoutConstant    = 0;
-		comTimeout.WriteTotalTimeoutMultiplier	= 0;
-	}
-	if (!SetCommTimeouts(hComm, &comTimeout))
-	{
-		MessageBox (*lphwnd,TEXT("Couldn't set timeouts"),TEXT(""), MB_OK);
-		return FALSE;
-	}*/
-
 	PurgeComm(hComm, PURGE_RXCLEAR | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_TXABORT);
 
     return TRUE;

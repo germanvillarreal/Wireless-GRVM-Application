@@ -25,7 +25,7 @@
 
 OVERLAPPED ov = {0};
 /*-----------------------------------------------------------------------------
--	FUNCTION:	ReadSerialPort
+-	FUNCTION:	ReadSerialPortControl
 -
 -	DATE:		November 23, 2013
 -
@@ -35,7 +35,7 @@ OVERLAPPED ov = {0};
 -
 -	PROGRAMMER:	Vincent Lau
 -
--	INTERFACE:	BOOL ReadSerialPort(HANDLE hComm, char packetBuffer[1024], DWORD dwBytesToRead,
+-	INTERFACE:	BOOL ReadSerialPortControl(HANDLE hComm, char packetBuffer[1024], DWORD dwBytesToRead,
 -					LPDWORD lpdwBytesRead, LPOVERLAPPED lpOV)
 -		
 -	RETURNS:	BOOL - TRUE on Reading sucess, FALSE if reading from serial port failed
@@ -46,52 +46,54 @@ OVERLAPPED ov = {0};
 -				LPDWORD lpdwBytesRead - how many bytes were read, pass this back in case useful
 -				
 -
--	NOTES:	The physical function to read from the serial port
+-	NOTES:	The physical function to read from the serial port for control characters
 -
 -----------------------------------------------------------------------------*/
-//BOOL ReadSerialPort(HANDLE hComm, char* packetBuffer, DWORD dwBytesToRead,
-//					LPDWORD lpdwBytesRead)
-//{
-//	Sleep(4000);
-//	MessageBox(NULL, TEXT("error (cs->cbInQue == 2)) BEFORE READ"), NULL, NULL);
-//	if (!ReadFile(hComm, packetBuffer, dwBytesToRead, lpdwBytesRead, &ov))
-//	{
-//		PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
-//		return FALSE;
-//	}
-//	PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
-//	return TRUE;
-//}
-
 BOOL ReadSerialPortControl(HANDLE hComm, char packetBuffer[2], DWORD dwBytesToRead,
 					LPDWORD lpdwBytesRead)
 {
-	//Sleep(1000);
 	packetBuffer[2] = '\0';
-	//MessageBox(NULL, TEXT("ReadSerialPortControl"), NULL, NULL);
 	if (!ReadFile(hComm, packetBuffer, 2, lpdwBytesRead, &ov))
 	{
 		MessageBox(NULL, TEXT("error ReadSerialPortControl After"), NULL, NULL);
 		PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
 		return FALSE;
 	}
-	//MessageBox(NULL, TEXT("error ReadSerialPortControl More than 2 bytes read"), NULL, NULL);
-	//PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
 	return TRUE;
 }
-
+/*-----------------------------------------------------------------------------
+-	FUNCTION:	ReadSerialPortData
+-
+-	DATE:		November 23, 2013
+-
+-	REVISIONS:	...
+-
+-	DESIGNER:	Vincent Lau
+-
+-	PROGRAMMER:	Robin Hsieh
+-
+-	INTERFACE:	BOOL ReadSerialPortData(HANDLE hComm, char packetBuffer[1024], DWORD dwBytesToRead,
+-					LPDWORD lpdwBytesRead, LPOVERLAPPED lpOV)
+-		
+-	RETURNS:	BOOL - TRUE on Reading sucess, FALSE if reading from serial port failed
+-				
+-	PARAMETERS: HANDLE hComm - Handle to the serial port
+-				char packetBuffer[1024] - the buffer we want to fill and send back
+-				DWORD dwBytesToRead - How many bytes are waiting to be read at the serial port
+-				LPDWORD lpdwBytesRead - how many bytes were read, pass this back in case useful
+-				
+-
+-	NOTES:	The physical function to read from the serial port for data
+-
+-----------------------------------------------------------------------------*/
 BOOL ReadSerialPortData(HANDLE hComm, char* packetBuffer, DWORD dwBytesToRead,
 					LPDWORD lpdwBytesRead)
 {
-	//Sleep(1000);
-	//MessageBox(NULL, TEXT("error ReadSerialPortData"), NULL, NULL);
 	if (!ReadFile(hComm, packetBuffer, 1024, lpdwBytesRead, &ov))
 	{
-		//MessageBox(NULL, TEXT("error ReadSerialPortData After"), NULL, NULL);
 		PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
 		return FALSE;
 	}
-	//PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
 	return TRUE;
 }
 
@@ -158,33 +160,8 @@ BOOL SendControl(HANDLE hComm, int controlType)
 LONG_PTR SendData(HANDLE hComm, char* packetToSend)
 {
 	DWORD dwBytesSent;
-	 LONG_PTR bytesSent;
-/*
-	if (!WriteFile(hComm, packetToSend, 1024, &dwBytesSent, &ov))
-		return FALSE;
-	return TRUE;*/
+	LONG_PTR bytesSent;
 	WriteFile(hComm, packetToSend, 1024, &dwBytesSent, &ov);
-	//bytesSent = GetOverlappedResult(hComm, &ov, &dwBytesSent, FALSE);
 	bytesSent = ov.InternalHigh;
 	return bytesSent;
-
-
-
-
-	////if (!WriteFile(hComm, packetToSend, strlen(packetToSend), &dwBytesSent, &ov))
-	//do
-	//{
-	//	WriteFile(hComm, packetToSend, PACKET_BYTES_TOTAL, &dwBytesSent, &ov);
-	//    
-	//}while(!GetOverlappedResult(hComm, &ov, &dwBytesSent, TRUE));
-	//return FALSE;
-
-	/*
-	if (!WriteFile(hComm, packetToSend, 1024, &dwBytesSent, &ov))
-	{
-//		WaitForSingleObject(hACKWaitSemaphore, INFINITE);
-		//GetOverlappedResult(hComm, &ov, &dwBytesSent, FALSE);
-		return FALSE;
-	}*/
-	//return TRUE;
 }
