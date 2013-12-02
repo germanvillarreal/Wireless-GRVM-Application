@@ -122,7 +122,7 @@ DWORD WINAPI TransmitThread(LPVOID param)
 					while(count < 6)
 					{
 						
-						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, 10000);
+						hACKWaitstuff = WaitForSingleObject(hACKWaitSemaphore, 2500);
 						if( hACKWaitstuff == WAIT_OBJECT_0){
 							count = 0;
 							bDoneSending = FALSE;
